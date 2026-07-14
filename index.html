@@ -15,7 +15,7 @@
         body { 
             margin: 0; padding: 0; 
             font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
-            background-color: #A8D5BA; /* 草地底色 */
+            background-color: #89CFF0; /* 預設背景色改為海洋藍 */
             overflow: hidden; 
             touch-action: none;
         }
@@ -24,7 +24,7 @@
         /* UI 疊層 */
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-            pointer-events: none; /* 讓點擊穿透到 canvas */
+            pointer-events: none;
             display: flex; flex-direction: column; justify-content: space-between;
         }
         
@@ -75,17 +75,11 @@
         .btn-outline { background: #F2F2F7; color: var(--apple-blue); }
         .btn-outline:active { background: #E5E5EA; }
 
-        /* 中間的開始與結束畫面 */
-        .center-modal {
-            align-items: center; justify-content: center;
-        }
-        .center-modal .modal {
-            border-radius: 24px; width: 85%; transform: scale(0.9); padding: 40px 24px;
-        }
+        .center-modal { align-items: center; justify-content: center; }
+        .center-modal .modal { border-radius: 24px; width: 85%; transform: scale(0.9); padding: 40px 24px; }
         .modal-container.active .center-modal .modal { transform: scale(1); }
         
         .emoji-art { font-size: 60px; margin-bottom: 15px; }
-
     </style>
 </head>
 <body>
@@ -99,7 +93,6 @@
         </div>
     </div>
 
-    <!-- 開始遊戲畫面 -->
     <div class="modal-container active center-modal" id="startScreen">
         <div class="modal">
             <div class="emoji-art">🌲💖🦖</div>
@@ -109,19 +102,15 @@
         </div>
     </div>
 
-    <!-- 問題畫面 -->
     <div class="modal-container" id="questionScreen">
         <div class="modal">
             <div class="emoji-art">🦖❓</div>
             <h2 id="qTitle">發現野生恐龍！</h2>
             <p id="qText">問題載入中...</p>
-            <div id="qOptions">
-                <!-- 按鈕動態生成 -->
-            </div>
+            <div id="qOptions"></div>
         </div>
     </div>
 
-    <!-- 結束畫面 -->
     <div class="modal-container center-modal" id="endScreen">
         <div class="modal">
             <div class="emoji-art">🎉🏆🦖</div>
@@ -135,7 +124,6 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // 設定畫布尺寸
     function resize() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -143,26 +131,22 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // 遊戲狀態與參數
     const WORLD_SIZE = 2000;
-    let gameState = 'start'; // start, playing, question, end
+    let gameState = 'start'; 
     let startTime = 0;
     let timerInterval = null;
     let timeElapsed = 0;
     
-    // 鏡頭與控制
     let camera = { x: WORLD_SIZE/2, y: WORLD_SIZE/2 };
     let input = { isDown: false, x: 0, y: 0 };
 
-    // 角色設定
     const player = {
         x: WORLD_SIZE / 2, y: WORLD_SIZE / 2,
-        speed: 8, size: 40, emoji: '💖',
-        history: [], // 用於記錄路徑，實現尾隨效果
+        speed: 4, size: 40, emoji: '💖',
+        history: [], 
         caughtDinos: 0
     };
     
-    // MIRROR 題庫 (12題)
     const mirrorQuestions = [
         { q: "姜濤的粉絲名稱是什麼？", options: ["姜糖", "神徒", "爵屎"], ans: 0 },
         { q: "Anson Lo (盧瀚霆) 的專屬應援色是什麼？", options: ["粉紅色", "藍色", "綠色"], ans: 0 },
@@ -178,30 +162,41 @@
         { q: "Jeremy (李駿傑) 的粉絲名稱是？", options: ["Unicorn", "柳柳粉", "蛋白粉"], ans: 0 }
     ];
 
-    // 生成場景與恐龍
+    // 生成邊界岩石 🪨
+    const borders = [];
+    const step = 50;
+    for(let i = 0; i <= WORLD_SIZE; i += step) {
+        borders.push({x: i, y: 0});               // 上
+        borders.push({x: i, y: WORLD_SIZE});      // 下
+        borders.push({x: 0, y: i});               // 左
+        borders.push({x: WORLD_SIZE, y: i});      // 右
+    }
+
+    // 生成場景樹木 (確保不生在邊界外)
     const trees = [];
     for(let i=0; i<150; i++) {
         trees.push({
-            x: Math.random() * WORLD_SIZE, y: Math.random() * WORLD_SIZE,
+            x: Math.random() * (WORLD_SIZE - 100) + 50, 
+            y: Math.random() * (WORLD_SIZE - 100) + 50,
             emoji: ['🌲','🌳','🌴'][Math.floor(Math.random()*3)],
             size: Math.random() * 20 + 40
         });
     }
 
+    // 生成恐龍草叢
     const dinos = [];
     for(let i=0; i<12; i++) {
         dinos.push({
             x: Math.random() * (WORLD_SIZE - 200) + 100,
             y: Math.random() * (WORLD_SIZE - 200) + 100,
             question: mirrorQuestions[i],
-            state: 'hidden', // hidden, caught
+            state: 'hidden', 
             bushEmoji: '🌟'
         });
     }
 
     let currentDinoIndex = -1;
 
-    // 觸控與滑鼠事件 (統一處理)
     function handleInputStart(e) {
         if(gameState !== 'playing') return;
         input.isDown = true;
@@ -216,7 +211,6 @@
     function updateInputPos(e) {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        // 將螢幕坐標轉換為世界坐標的目標方向
         input.x = clientX - canvas.width/2;
         input.y = clientY - canvas.height/2;
     }
@@ -228,7 +222,6 @@
     canvas.addEventListener('touchmove', handleInputMove, {passive: false});
     window.addEventListener('touchend', handleInputEnd);
 
-    // 遊戲開始
     window.startGame = function() {
         document.getElementById('startScreen').classList.remove('active');
         document.getElementById('hud').style.display = 'flex';
@@ -246,7 +239,6 @@
         document.getElementById('timerDisplay').innerText = `⏱️ ${m}:${s}`;
     }
 
-    // 觸發問題
     function triggerQuestion(index) {
         gameState = 'question';
         input.isDown = false;
@@ -271,7 +263,6 @@
     function checkAnswer(selectedIndex) {
         const dino = dinos[currentDinoIndex];
         if(selectedIndex === dino.question.ans) {
-            // 答對
             document.getElementById('questionScreen').classList.remove('active');
             dino.state = 'caught';
             player.caughtDinos++;
@@ -282,7 +273,6 @@
                 endGame();
             }
         } else {
-            // 答錯提示 (簡單震動或改字)
             const title = document.getElementById('qTitle');
             title.innerText = "答錯了！再試一次！";
             title.style.color = "#FF3B30";
@@ -297,72 +287,71 @@
         const s = String(timeElapsed % 60).padStart(2, '0');
         document.getElementById('finalTime').innerText = `${m}:${s}`;
         document.getElementById('hud').style.display = 'none';
-        setTimeout(() => {
-            document.getElementById('endScreen').classList.add('active');
-        }, 500);
+        setTimeout(() => { document.getElementById('endScreen').classList.add('active'); }, 500);
     }
 
-    // 核心循環
     function gameLoop() {
         update();
         draw();
-        if(gameState !== 'end') {
-            requestAnimationFrame(gameLoop);
-        }
+        if(gameState !== 'end') requestAnimationFrame(gameLoop);
     }
 
     function update() {
         if(gameState !== 'playing') return;
 
-        // 角色移動
+        // 角色移動與邊界碰撞 (保留 40 像素的緩衝區，避免踩穿石頭)
         if(input.isDown) {
             const dist = Math.hypot(input.x, input.y);
             if(dist > 5) {
                 const dx = (input.x / dist) * player.speed;
                 const dy = (input.y / dist) * player.speed;
-                player.x = Math.max(20, Math.min(WORLD_SIZE - 20, player.x + dx));
-                player.y = Math.max(20, Math.min(WORLD_SIZE - 20, player.y + dy));
+                player.x = Math.max(40, Math.min(WORLD_SIZE - 40, player.x + dx));
+                player.y = Math.max(40, Math.min(WORLD_SIZE - 40, player.y + dy));
             }
         }
 
-        // 記錄歷史位置 (貪吃蛇跟隨)
         player.history.unshift({x: player.x, y: player.y});
-        if(player.history.length > 300) player.history.pop(); // 限制歷史長度避免內存洩漏
+        if(player.history.length > 300) player.history.pop();
 
-        // 平滑相機跟隨 (Lerp)
         camera.x += (player.x - camera.x) * 0.1;
         camera.y += (player.y - camera.y) * 0.1;
 
-        // 碰撞偵測 (尋找恐龍)
         dinos.forEach((dino, index) => {
             if(dino.state === 'hidden') {
                 const dist = Math.hypot(player.x - dino.x, player.y - dino.y);
-                if(dist < 50) {
-                    triggerQuestion(index);
-                }
+                if(dist < 50) triggerQuestion(index);
             }
         });
     }
 
     function draw() {
-        // 清理背景
-        ctx.fillStyle = '#A8D5BA';
+        // 1. 畫螢幕底色：設定為海洋水色 (地圖外的世界)
+        ctx.fillStyle = '#89CFF0';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.save();
-        // 應用相機位移 (讓角色置中)
         ctx.translate(canvas.width/2 - camera.x, canvas.height/2 - camera.y);
+
+        // 2. 畫地圖底色：森林草地 (可玩區域)
+        ctx.fillStyle = '#A8D5BA';
+        ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        // 繪製樹木
+        // 3. 畫邊界岩石牆
+        ctx.font = `40px Arial`;
+        borders.forEach(b => {
+            ctx.fillText('🪨', b.x, b.y);
+        });
+
+        // 4. 畫樹木
         trees.forEach(tree => {
             ctx.font = `${tree.size}px Arial`;
             ctx.fillText(tree.emoji, tree.x, tree.y);
         });
 
-        // 繪製隱藏的恐龍(草叢)
+        // 5. 畫隱藏的恐龍(草叢)
         dinos.forEach(dino => {
             if(dino.state === 'hidden') {
                 ctx.font = `50px Arial`;
@@ -370,12 +359,11 @@
             }
         });
 
-        // 繪製跟隨的恐龍
+        // 6. 畫跟隨的恐龍
         let caughtCount = 0;
         dinos.forEach(dino => {
             if(dino.state === 'caught') {
                 caughtCount++;
-                // 根據抓到的順序，從歷史陣列中提取延遲位置
                 const historyIndex = caughtCount * 15; 
                 const pos = player.history[historyIndex] || player.history[player.history.length-1];
                 if(pos) {
@@ -385,7 +373,7 @@
             }
         });
 
-        // 繪製主角 💖
+        // 7. 畫主角
         ctx.font = `${player.size}px Arial`;
         ctx.fillText(player.emoji, player.x, player.y);
 
