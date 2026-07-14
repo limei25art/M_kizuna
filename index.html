@@ -56,7 +56,7 @@
             100% { transform: scale(1); }
         }
 
-        /* 模態框 (專為手機 Safari 進行彈性與滾動優化) */
+      /* Modal 通用 */
         .modal-container {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.4);
@@ -77,14 +77,14 @@
             text-align: center;
             box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
             
-            max-height: 85vh; /* 不佔滿全螢幕，留出頂部空間 */
+            max-height: 90vh; /* 不佔滿全螢幕，留出頂部空間 */
             overflow-y: auto; /* 內容過長時自動啟用內部滾動條 */
             -webkit-overflow-scrolling: touch; /* 讓 Safari 滾動更流暢 */
             display: flex;
             flex-direction: column;
         }
         .modal-container.active .modal { transform: translateY(0); }
-        
+        .emoji-art { font-size: 48px; margin-bottom: 8px; }
         .modal h2 { margin: 0 0 10px; font-size: 22px; color: var(--apple-text); flex-shrink: 0; }
         .modal p { color: #8E8E93; font-size: 16px; margin-bottom: 20px; line-height: 1.4; flex-shrink: 0; }
         
@@ -92,7 +92,9 @@
         #qOptions {
             display: flex;
             flex-direction: column;
-            width: 100%;
+            gap: 10px;
+            margin-top: auto;           /* 重要：把按鈕推到底部，確保空間 */
+            padding-bottom: 8px;
         }
 
         .btn {
@@ -106,18 +108,14 @@
         .btn-outline { background: #F2F2F7; color: var(--apple-blue); }
         .btn-outline:active { background: #E5E5EA; }
 
-        /* 置中模態框 (用於開始和結束畫面) */
+        /* 置中 Modal */
         .center-modal { align-items: center; justify-content: center; }
         .center-modal .modal { 
             border-radius: 24px; 
-            width: 85%; 
-            transform: scale(0.9); 
-            padding: 35px 24px;
-            max-height: 80vh;
+            width: 88%; 
+            max-height: 85vh;
+            padding: 28px 24px;
         }
-        .modal-container.active .center-modal .modal { transform: scale(1); }
-        
-        .emoji-art { font-size: 50px; margin-bottom: 12px; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -139,6 +137,8 @@
             <button class="btn" onclick="startGame()">開始遊戲</button>
         </div>
     </div>
+
+    <div class="modal-container active center-modal" id="startScreen"> ... </div>
 
     <div class="modal-container" id="questionScreen">
         <div class="modal">
