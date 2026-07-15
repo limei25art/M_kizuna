@@ -214,11 +214,44 @@
             flex-direction: column;
             gap: 6px;
         }
+
+        /* 📱 虛擬搖桿 CSS 樣式 (極簡半透明 Egarden 設計) */
+        .joystick-container {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            background: rgba(253, 251, 247, 0.18);
+            border: 1.5px solid rgba(163, 177, 138, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            display: none;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            box-shadow: 0 8px 24px rgba(26, 47, 22, 0.15);
+            backdrop-filter: blur(2px);
+            transition: opacity 0.15s ease;
+        }
+
+        .joystick-knob {
+            position: absolute;
+            left: calc(50% - 18px);
+            top: calc(50% - 18px);
+            width: 36px;
+            height: 36px;
+            background: radial-gradient(circle, var(--egarden-green-light) 0%, var(--egarden-green-leaf) 100%);
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body>
 
     <div class="noise-overlay"></div>
+
+    <!-- 📱 虛擬搖桿 HTML 節點 -->
+    <div id="joystick" class="joystick-container">
+        <div id="joystick-knob" class="joystick-knob"></div>
+    </div>
 
     <canvas id="gameCanvas"></canvas>
 
@@ -297,12 +330,24 @@
     const CAMP_CENTER_Y = WORLD_SIZE / 2;
 
     let camera = { x: CAMP_CENTER_X, y: CAMP_CENTER_Y };
-    let input = { isDown: false, x: 0, y: 0 };
+
+    // --- 📱 優化的 Mobile 控制參數（動態虛擬搖桿） ---
+    let input = { 
+        isDown: false, 
+        startX: 0, startY: 0, // 搖桿中心點 (Touch Start 位置)
+        curX: 0, curY: 0,     // 目前觸控點位置
+        vectorX: 0, vectorY: 0 // 計算出的移動方向向量 (-1 到 1 之間)
+    };
+    
+    const joystickEl = document.getElementById('joystick');
+    const joystickKnobEl = document.getElementById('joystick-knob');
+    const MAX_JOYSTICK_DIST = 45; // 搖桿最大拉動距離 (px)
+    const DEADZONE = 5;          // 觸控死區，防止微小手震引發抖動
 
     const player = {
         x: CAMP_CENTER_X, 
         y: CAMP_CENTER_Y,
-        speed: 4.5, size: 40, emoji: '🌼',
+        speed: 8, size: 40, emoji: '🌼',
         history: [{x: CAMP_CENTER_X, y: CAMP_CENTER_Y}], 
         caughtDinos: 0
     };
@@ -461,27 +506,81 @@
 
     let currentDinoIndex = -1;
 
+    // --- 📱 行動裝置專屬動態搖桿事件處理 ---
     function handleInputStart(e) {
         if(gameState !== 'playing') return;
+        // 阻止瀏覽器預設下拉與回彈手勢
+        if(e.cancelable) e.preventDefault();
+        
         input.isDown = true;
-        updateInputPos(e);
-    }
-    function handleInputMove(e) {
-        if(!input.isDown || gameState !== 'playing') return;
-        updateInputPos(e);
-    }
-    function handleInputEnd() { input.isDown = false; }
-    
-    function updateInputPos(e) {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        input.x = clientX - window.innerWidth/2;
-        input.y = clientY - window.innerHeight/2;
+        
+        // 在手指落下的位置生成搖桿
+        input.startX = clientX;
+        input.startY = clientY;
+        input.curX = clientX;
+        input.curY = clientY;
+        
+        joystickEl.style.left = `${clientX}px`;
+        joystickEl.style.top = `${clientY}px`;
+        joystickEl.style.display = 'block';
+        joystickEl.style.opacity = '1';
+        
+        joystickKnobEl.style.transform = 'translate(0px, 0px)';
     }
 
+    function handleInputMove(e) {
+        if(!input.isDown || gameState !== 'playing') return;
+        if(e.cancelable) e.preventDefault();
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        input.curX = clientX;
+        input.curY = clientY;
+
+        // 計算拖曳向量與距離
+        const dx = input.curX - input.startX;
+        const dy = input.curY - input.startY;
+        const distance = Math.hypot(dx, dy);
+
+        if (distance < DEADZONE) {
+            input.vectorX = 0;
+            input.vectorY = 0;
+            joystickKnobEl.style.transform = 'translate(0px, 0px)';
+            return;
+        }
+
+        // 限制搖桿圓鈕最大移動距離
+        const angle = Math.atan2(dy, dx);
+        const limitedDist = Math.min(distance, MAX_JOYSTICK_DIST);
+        
+        const knobX = Math.cos(angle) * limitedDist;
+        const knobY = Math.sin(angle) * limitedDist;
+        
+        joystickKnobEl.style.transform = `translate(${knobX}px, ${knobY}px)`;
+
+        // 輸出歸一化（Normalize）方向向量
+        input.vectorX = knobX / MAX_JOYSTICK_DIST;
+        input.vectorY = knobY / MAX_JOYSTICK_DIST;
+    }
+
+    function handleInputEnd(e) { 
+        input.isDown = false;
+        input.vectorX = 0;
+        input.vectorY = 0;
+        joystickEl.style.opacity = '0';
+        setTimeout(() => {
+            if(!input.isDown) joystickEl.style.display = 'none';
+        }, 150);
+    }
+
+    // 重新綁定高靈敏度觸控與滑鼠事件
     canvas.addEventListener('mousedown', handleInputStart);
     canvas.addEventListener('mousemove', handleInputMove);
     window.addEventListener('mouseup', handleInputEnd);
+    
+    // 加上 passive: false 確保 e.preventDefault() 起作用防止畫面滾動
     canvas.addEventListener('touchstart', handleInputStart, {passive: false});
     canvas.addEventListener('touchmove', handleInputMove, {passive: false});
     window.addEventListener('touchend', handleInputEnd);
@@ -506,6 +605,7 @@
     function triggerQuestion(index) {
         gameState = 'question';
         input.isDown = false;
+        joystickEl.style.display = 'none'; // 彈出題目時暫時隱藏搖桿
         currentDinoIndex = index;
         const dino = dinos[index];
         
@@ -549,6 +649,7 @@
     function triggerCampHint() {
         gameState = 'camp_hint';
         input.isDown = false;
+        joystickEl.style.display = 'none';
         document.getElementById('campHintScreen').classList.add('active');
     }
 
@@ -564,6 +665,7 @@
     function endGame() {
         gameState = 'end';
         clearInterval(timerInterval);
+        joystickEl.style.display = 'none';
         const m = String(Math.floor(timeElapsed / 60)).padStart(2, '0');
         const s = String(timeElapsed % 60).padStart(2, '0');
         document.getElementById('finalTime').innerText = `${m}:${s}`;
@@ -582,18 +684,17 @@
 
         let isMoved = false;
 
-        if(input.isDown) {
-            const dist = Math.hypot(input.x, input.y);
-            if(dist > 5) {
-                const dx = (input.x / dist) * player.speed;
-                const dy = (input.y / dist) * player.speed;
-                const nextX = Math.max(40, Math.min(WORLD_SIZE - 40, player.x + dx));
-                const nextY = Math.max(40, Math.min(WORLD_SIZE - 40, player.y + dy));
-                if (player.x !== nextX || player.y !== nextY) {
-                    player.x = nextX;
-                    player.y = nextY;
-                    isMoved = true;
-                }
+        // 📱 使用搖桿的方向向量控制角色移動，擺脫鍵盤依賴並優化流暢度
+        if(input.isDown && (input.vectorX !== 0 || input.vectorY !== 0)) {
+            const dx = input.vectorX * player.speed;
+            const dy = input.vectorY * player.speed;
+            const nextX = Math.max(40, Math.min(WORLD_SIZE - 40, player.x + dx));
+            const nextY = Math.max(40, Math.min(WORLD_SIZE - 40, player.y + dy));
+            
+            if (player.x !== nextX || player.y !== nextY) {
+                player.x = nextX;
+                player.y = nextY;
+                isMoved = true;
             }
         }
 
