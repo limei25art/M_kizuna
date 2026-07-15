@@ -767,7 +767,7 @@
         dinos.forEach((dino, index) => {
             if(dino.state === 'caught') {
                 caughtCount++;
-                const historyIndex = caughtCount * 15; 
+                const historyIndex = caughtCount * 9; 
                 const pos = player.history[historyIndex] || player.history[player.history.length-1];
                 if(pos) {
                     ctx.save();
@@ -779,7 +779,7 @@
                     ctx.shadowBlur = 8;
                     ctx.shadowOffsetY = 5 - bounceOffset; // 影子跟著彈跳自動變遠
                     
-                    ctx.font = '35px Arial';
+                    ctx.font = '50px Arial';
                     // Y軸加上彈跳偏移量，實現 CSS 的 translateY 效果
                     ctx.fillText('🦖', ~~pos.x, ~~(pos.y + bounceOffset)); 
                     
