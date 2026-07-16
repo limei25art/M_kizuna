@@ -262,7 +262,7 @@
             <div class="emoji-art">🍀🌼⛺</div>
             <h2>MIRROR - KIZUNA</h2>
             <span class="subtitle">12恐龍捉迷藏 專屬視覺版</span>
-            <p>歡迎來到極簡綠植藝術空間。<br>在陽光散落的林間尋找 12 隻隱藏的成員恐龍，<br>答對成員謎題，並將牠們優雅地引導回中央營地。</p>
+            <p>歡迎來到極簡綠植藝術空間。<br>在陽光散落的林間尋找 12 隻隱藏的恐龍，<br>答對植物謎題，並將牠們優雅地引導回中央營地。</p>
             <button class="btn" onclick="startGame()">踏入漫步</button>
         </div>
     </div>
@@ -281,7 +281,7 @@
             <div class="emoji-art">⛺✨🍀</div>
             <h2>KIZUNA 羈絆已建立</h2>
             <span class="subtitle">MISSION 1 COMPLETED</span>
-            <p>做得很好，12 隻成員恐龍已被成功收服。<br>現在，請伴隨隊伍回到地圖正中央的 <strong>大本營</strong> 集合，開啟下一階段的新任務！</p>
+            <p>做得很好，12 隻 MIRROR 恐龍已被成功收服。<br>現在，請伴隨隊伍回到地圖正中央的 <strong>大本營</strong> 集合，開啟下一階段的新任務！</p>
             <button class="btn" style="background: linear-gradient(135deg, var(--egarden-green-leaf), #556B2F);" onclick="closeCampHint()">回歸大本營</button>
         </div>
     </div>
@@ -333,25 +333,12 @@
     const assetsData = {
         player: 'assets/player.png',
         camp: 'assets/camp.png',
+        dino: 'assets/dino.png',
         bush1: 'assets/bush1.png',
         bush2: 'assets/bush2.png',
         tree1: 'assets/tree1.png',
         tree2: 'assets/tree2.png',
         tree3: 'assets/tree3.png',
-        // 階段一：12幅成員專屬恐龍圖片
-        dino_0: 'assets/dino_0.png',
-        dino_1: 'assets/dino_1.png',
-        dino_2: 'assets/dino_2.png',
-        dino_3: 'assets/dino_3.png',
-        dino_4: 'assets/dino_4.png',
-        dino_5: 'assets/dino_5.png',
-        dino_6: 'assets/dino_6.png',
-        dino_7: 'assets/dino_7.png',
-        dino_8: 'assets/dino_8.png',
-        dino_9: 'assets/dino_9.png',
-        dino_10: 'assets/dino_10.png',
-        dino_11: 'assets/dino_11.png',
-        // 階段二：12幅成員專屬人形/守護形象圖片
         member_0: 'assets/member_0.png',
         member_1: 'assets/member_1.png',
         member_2: 'assets/member_2.png',
@@ -369,6 +356,7 @@
     let imagesLoaded = 0;
     const totalImages = Object.keys(assetsData).length;
 
+    // 載入所有圖片，完成後隱藏 Loading 畫面並顯示開始按鈕
     for (const key in assetsData) {
         images[key] = new Image();
         images[key].onload = () => {
@@ -382,6 +370,7 @@
                 }, 500);
             }
         };
+        // 若圖片未找到，則輸出錯誤但不阻擋運行（會無法渲染該圖）
         images[key].onerror = () => {
             console.error(`圖片缺少: ${assetsData[key]}`);
             imagesLoaded++;
@@ -411,43 +400,42 @@
     const player = {
         x: CAMP_CENTER_X, y: CAMP_CENTER_Y,
         speed: 8, size: 50, 
-        radius: 18, 
+        radius: 18, // 玩家碰撞半徑
         history: [{x: CAMP_CENTER_X, y: CAMP_CENTER_Y}], 
         caughtDinos: 0, transformedMembers: 0 
     };
 
-    const camp = { x: CAMP_CENTER_X, y: CAMP_CENTER_Y, size: 120 }; 
+    const camp = { x: CAMP_CENTER_X, y: CAMP_CENTER_Y, size: 120 }; // 營地繪製大小
     let visualEffects = [], particleSystems = [];
 
-    // 階段一謎題 (已對應成員ID順序)
     const phase1Questions = [
-        { id: 0, q: "Anson Lo (盧瀚霆) 的專屬應援色是什麼？", options: ["粉紅色", "藍色", "綠色"], ans: 0 },
-        { id: 1, q: "Lokman (楊樂文) 在 MIRROR 中的職位是？", options: ["隊長", "副隊長", "忙內"], ans: 0 },
-        { id: 2, q: "Ian (陳卓賢) 在入行前是哪一項運動的香港代表隊成員？", options: ["籃球", "排球", "足球"], ans: 1 },
-        { id: 3, q: "Jeremy (李駿傑) 的粉絲名稱是？", options: ["Unicorn", "柳柳粉", "蛋白粉"], ans: 0 },
-        { id: 4, q: "Stanley (邱士縉) 有什麼稱號？", options: ["大表哥", "老虎仔", "皮皮"], ans: 0 },
-        { id: 5, q: "Edan (呂爵安) 在《大叔的愛》中飾演什麼角色？", options: ["田一雄", "凌少牧", "翟國強"], ans: 0 },
-        { id: 6, q: "AK (江𤒹生) 的全名是？", options: ["江𤒹生", "汪𤒹生", "江華生"], ans: 0 },
-        { id: 7, q: "Alton (王智德) 的經典金句是？", options: ["尋求無悔真生活", "焫焫焫焫焫著", "肌肉就是力量"], ans: 0 },
-        { id: 8, q: "Frankie (陳瑞輝) 的別稱是什麼？", options: ["皮皮", "蛋白", "柳柳"], ans: 0 },
-        { id: 9, q: "姜濤的粉絲名稱是什麼？", options: ["姜糖", "神徒", "爵屎"], ans: 0 },
-        { id: 10, q: "哪一首是 Jer (柳應廷) 的「物語系列」歌曲？", options: ["水刑物語", "狂人日記", "砂之器"], ans: 0 },
-        { id: 11, q: "Tiger (邱傲然) 最擅長的舞蹈/武術是？", options: ["拉丁舞", "芭蕾舞", "踢踏舞"], ans: 0 }
+        { q: "姜濤的粉絲名稱是什麼？", options: ["姜糖", "神徒", "爵屎"], ans: 0 },
+        { q: "Anson Lo (盧瀚霆) 的專屬應援色是什麼？", options: ["粉紅色", "藍色", "綠色"], ans: 0 },
+        { q: "Edan (呂爵安) 在《大叔的愛》中飾演什麼角色？", options: ["田一雄", "凌少牧", "翟國強"], ans: 0 },
+        { q: "Ian (陳卓賢) 在入行前是哪一項運動的香港代表隊成員？", options: ["籃球", "排球", "足球"], ans: 1 },
+        { q: "哪一首是 Jer (柳應廷) 的「物語系列」歌曲？", options: ["水刑物語", "狂人日記", "砂之器"], ans: 0 },
+        { q: "AK 的全名是？", options: ["江𤒹生", "汪𤒹生", "江華生"], ans: 0 },
+        { q: "Lokman (楊樂文) 在 MIRROR 中的職位是？", options: ["隊長", "副隊長", "忙內"], ans: 0 },
+        { q: "Stanley (邱士縉) 有什麼稱號？", options: ["大表哥", "老虎仔", "皮皮"], ans: 0 },
+        { q: "Frankie (陳瑞輝) 的別稱是什麼？", options: ["皮皮", "蛋白", "柳柳"], ans: 0 },
+        { q: "Tiger (邱傲然) 最擅長的舞蹈/武術是？", options: ["拉丁舞", "芭蕾舞", "踢踏舞"], ans: 0 },
+        { q: "Alton (王智德) 的經典金句是？", options: ["尋求無悔真生活", "焫焫焫焫焫著", "肌肉就是力量"], ans: 0 },
+        { q: "Jeremy (李駿傑) 的粉絲名稱是？", options: ["Unicorn", "柳柳粉", "蛋白粉"], ans: 0 }
     ];
 
-    // 階段二成員專屬謎題
+    // 階段二成員專屬謎題與 Emoji (已按新排位調整)
     const phase2Questions = [
-        { id: 0, name: "Anson Lo", emoji: "👶🏼", q: "「教主」Anson Lo 的代表 Emoji 👶🏼 (神之娃) 取自哪首洗腦神曲的造型？", options: ["《Megahit》", "《Mr. Stranger》", "《Money》"], ans: 0 },
-        { id: 1, name: "Lokman", emoji: "🕺", q: "隊長 Lokman 以舞台舞技稱霸，他的代表 Emoji 🕺 象徵他在哪套街舞電影《狂舞派》中的角色？", options: ["柒良", "Dave", "阿龍"], ans: 1 },
-        { id: 2, name: "Ian", emoji: "🐨", q: "Ian 的代表 Emoji 是呆萌無尾熊 🐨。請問他最新派台歌《KIZUNA》在與他音樂創作中最著重哪種特質？", options: ["狂野電音", "溫暖心靈羈絆", "古典弦樂重奏"], ans: 1 },
-        { id: 3, name: "Jeremy", emoji: "🦄", q: "「獨角獸之首」Jeremy 的代表 Emoji 🦄 與他哪首主打「妖媚異界風」的歌曲概念最為契合？", options: ["《半》", "《九》", "《Fever》"], ans: 0 },
-        { id: 4, name: "Stanley", emoji: "🐲", q: "大表哥 Stanley 作為隊中的運動巨無霸，為什麼他的代表 Emoji 是威猛的恐龍 🐲 呢？", options: ["因為他演過侏羅紀舞台劇", "因為他身形高大、性格外剛內柔", "因為他很喜歡吃生肉"], ans: 1 },
-        { id: 5, name: "Edan", emoji: "🐤", q: "Edan 呂爵安的代表 Emoji 是黃色小雞 🐤。請問這與他搞笑親切的形象，以及粉絲稱呼他為什麼有關？", options: ["爵爺", "安安", "兒登 / 雀安"], ans: 2 },
-        { id: 6, name: "Anson Kong", emoji: "🦊", q: "AK 的代表 Emoji 是帥氣又帶點機靈的狐狸 🦊。請問他在 MIRROR 中除了副隊長職務外，還最常負責哪種擔當？", options: ["冷淡擔當", "熱血氣氛擔當", "搞笑裝傻擔當"], ans: 1 },
-        { id: 7, name: "Alton", emoji: "🦍", q: "Alton 的代表 Emoji 是大猩猩 🦍。這主要展現了他哪一項標蹟性的身體特徵與性格魅力？", options: ["精湛的廚藝", "結實的肌肉與說唱爆發力", "超高的智商"], ans: 1 },
         { id: 8, name: "Frankie", emoji: "🍅", q: "Frankie 的代表 Emoji 是紅蕃茄 🍅。請問這個可愛的名字與形象，與 Frankie 哪一個著名的別稱直接相關？", options: ["皮皮", "粉紅番茄仔", "旦旦"], ans: 0 },
-        { id: 9, name: "Keung To", emoji: "🍬", q: "姜濤的代表 Emoji 是糖果 🍬。這與他的粉絲名稱「姜糖」高度契合，也象徵著哪首甜蜜熱門金曲的氛圍？", options: ["《蒙著嘴說愛你》", "《鏡中鏡》", "《作品的說話》"], ans: 0 },
+        { id: 7, name: "Alton", emoji: "🦍", q: "Alton 的代表 Emoji 是大猩猩 🦍。這主要展現了他哪一項標蹟性的身體特徵與性格魅力？", options: ["精湛的廚藝", "結實的肌肉與說唱爆發力", "超高的智商"], ans: 1 },
+        { id: 1, name: "Lokman", emoji: "🕺", q: "隊長 Lokman 以舞台舞技稱霸，他的代表 Emoji 🕺 象徵他在哪套街舞電影《狂舞派》中的角色？", options: ["柒良", "Dave", "阿龍"], ans: 1 },
+        { id: 4, name: "Stanley", emoji: "🐲", q: "大表哥 Stanley 作為隊中的運動巨無霸，為什麼他的代表 Emoji 是威猛的恐龍 🐲 呢？", options: ["因為他演過侏羅紀舞台劇", "因為他身形高大、性格外剛內柔", "因為他很喜歡吃生肉"], ans: 1 },
+        { id: 6, name: "Anson Kong", emoji: "🦊", q: "AK 的代表 Emoji 是帥氣又帶點機靈的狐狸 🦊。請問他在 MIRROR 中除了副隊長職務外，還最常負責哪種擔當？", options: ["冷淡擔當", "熱血氣氛擔當", "搞笑裝傻擔當"], ans: 1 },
         { id: 10, name: "Jer", emoji: "🐠", q: "Jer 柳應廷的代表 Emoji 是熱帶魚 🐠。這與他音樂中如流水般空靈深邃的哪首歌、或代表系列最為相符？", options: ["《水刑物語》", "《人類群星閃耀時》", "《狂人日記》"], ans: 0 },
+        { id: 2, name: "Ian", emoji: "🐨", q: "Ian 的代表 Emoji 是呆萌無尾熊 🐨。請問他最新派台歌《KIZUNA》在與他音樂創作中最著重哪種特質？", options: ["狂野電音", "溫暖心靈羈絆", "古典弦樂重奏"], ans: 1 },
+        { id: 0, name: "Anson Lo", emoji: "👶🏼", q: "「教主」Anson Lo 的代表 Emoji 👶🏼 (神之娃) 取自哪首洗腦神曲的造型，或象徵其不老可愛感？", options: ["《Megahit》", "《Mr. Stranger》", "《Money》"], ans: 0 },
+        { id: 3, name: "Jeremy", emoji: "🦄", q: "「獨角獸之首」Jeremy 的代表 Emoji 🦄 與他哪首主打「妖媚異界風」的歌曲概念最為契合？", options: ["《半》", "《九》", "《Fever》"], ans: 0 },
+        { id: 5, name: "Edan", emoji: "🐤", q: "Edan 呂爵安的代表 Emoji 是黃色小雞 🐤。請問這與他搞笑親切的形象，以及粉絲稱呼他為什麼有關？", options: ["爵爺", "安安", "兒登 / 雀安"], ans: 2 },
+        { id: 9, name: "Keung To", emoji: "🍬", q: "姜濤的代表 Emoji 是糖果 🍬。這與他的粉絲名稱「姜糖」高度契合，也象徵著哪首甜蜜熱門金曲的氛圍？", options: ["《蒙著嘴說愛你》", "《鏡中鏡》", "《作品的說話》"], ans: 0 },
         { id: 11, name: "Tiger", emoji: "🐯", q: "忙內 Tiger 的代表 Emoji 是小老虎 🐯。這除了代表他的名字以外，還代表著他哪項不為人知的導演才華？", options: ["他執導過MIRROR的MV與短片", "他拿過世界武術冠軍", "他擅長彈奏電結他"], ans: 0 }
     ];
 
@@ -476,7 +464,7 @@
                 x: tx, y: ty,
                 imgKey: ['tree1','tree2','tree3'][Math.floor(Math.random()*3)],
                 size: treeSize,
-                radius: treeSize * 0.28 
+                radius: treeSize * 0.28 // 設定樹木的主幹碰撞半徑（取樹冠尺寸的約 28% 以符合視覺效果）
             });
         }
     }
@@ -485,7 +473,7 @@
     function initPhase1Pool() {
         shuffledDinosPool = [];
         for(let i = 0; i < 12; i++) {
-            shuffledDinosPool.push({ id: phase1Questions[i].id, question: phase1Questions[i], bushKey: 'bush1', phase: 1 });
+            shuffledDinosPool.push({ id: i, question: phase1Questions[i], bushKey: 'bush1', phase: 1 });
         }
         shuffledDinosPool.sort(() => Math.random() - 0.5);
     }
@@ -529,6 +517,7 @@
 
     for(let i = 0; i < 6; i++) { spawnDino(); }
 
+    // 準備漸變背景底圖 (只有草地顏色，物件在 draw 函數即時渲染)
     const bgCanvas = document.createElement('canvas');
     bgCanvas.width = WORLD_SIZE; bgCanvas.height = WORLD_SIZE;
     const bgCtx = bgCanvas.getContext('2d');
@@ -548,6 +537,7 @@
         bgCtx.fillStyle = radGrad; bgCtx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
     });
 
+    // 營地土褐黃沙區 (底圖)
     bgCtx.fillStyle = '#E6DCCF'; bgCtx.beginPath(); bgCtx.arc(camp.x, camp.y, 75, 0, Math.PI * 2); bgCtx.fill();
     bgCtx.strokeStyle = '#C5B7A5'; bgCtx.lineWidth = 3; bgCtx.setLineDash([8, 12]); bgCtx.stroke(); bgCtx.setLineDash([]);
     bgCtx.font = `40px Arial`; borders.forEach(b => bgCtx.fillText('🪨', b.x, b.y));
@@ -592,6 +582,10 @@
         document.getElementById('startScreen').classList.remove('active');
         document.getElementById('hud').style.display = 'flex';
         gameState = 'playing'; startTime = Date.now(); timerInterval = setInterval(updateTimer, 1000);
+        
+        for(let i = 0; i < 12; i++) {
+            activeFollowers.push({ id: i, transformed: false });
+        }
         gameLoop();
     }
 
@@ -614,7 +608,7 @@
         const qTitle = document.getElementById('qTitle');
         const qSub = document.getElementById('qSub');
         if (currentPhase === 1) {
-            qTitle.innerText = "發現成員專屬恐龍 🦖";
+            qTitle.innerText = "發現野生恐龍 🦖";
             qSub.innerText = "KIZUNA BOTANICAL QUIZ";
         } else {
             qTitle.innerText = `尋回成員 ${dino.question.name} 記憶`;
@@ -659,10 +653,6 @@
             
             if(currentPhase === 1) {
                 player.caughtDinos++;
-                // 將該隻恐龍加入跟隨者隊伍中，保留其成員 id
-                activeFollowers.push({ id: dino.id, transformed: false });
-                createCelebrationParticles(dino.x, dino.y);
-
                 if(player.caughtDinos < 12) {
                     document.getElementById('scoreDisplay').innerText = `🦖 ${player.caughtDinos} / 12`;
                     spawnDino();
@@ -674,8 +664,8 @@
             } else {
                 player.transformedMembers++;
                 
-                // 找到隊伍中對應 ID 的成員並將其設為已變身
-                const targetFollower = activeFollowers.find(f => f.id === dino.id);
+                // 將隊伍中對應 ID 的物件設為已變身
+                const targetFollower = activeFollowers.find(f => f.id === dino.question.id);
                 if (targetFollower) targetFollower.transformed = true;
                 
                 createCelebrationParticles(dino.x, dino.y);
@@ -778,12 +768,14 @@
             let nextX = Math.max(40, Math.min(WORLD_SIZE - 40, player.x + dx));
             let nextY = Math.max(40, Math.min(WORLD_SIZE - 40, player.y + dy));
             
-            // 樹木碰撞檢測與位置修正
+            // --- 樹木碰撞檢測與位置修正 ---
             trees.forEach(tree => {
                 const dist = Math.hypot(nextX - tree.x, nextY - tree.y);
                 const minDist = player.radius + tree.radius;
                 if (dist < minDist) {
+                    // 計算碰撞反方向的單位向量
                     const angle = Math.atan2(nextY - tree.y, nextX - tree.x);
+                    // 將玩家推回到剛好不重疊的邊界位置
                     nextX = tree.x + Math.cos(angle) * minDist;
                     nextY = tree.y + Math.sin(angle) * minDist;
                 }
@@ -826,6 +818,7 @@
         particleSystems = particleSystems.filter(p => p.life > 0);
     }
 
+    // 封裝繪製圖片功能 (自動置中渲染)
     function drawImageCentered(ctx, img, x, y, width, height) {
         if (!img || !img.complete || img.naturalWidth === 0) return;
         ctx.drawImage(img, x - width / 2, y - height / 2, width, height);
@@ -871,22 +864,21 @@
             }
         });
 
-        // 視覺煙霧特效 
+        // 視覺煙霧特效 (文字)
         visualEffects.forEach(eff => {
             ctx.save(); ctx.globalAlpha = eff.life; ctx.font = '45px Arial';
             ctx.fillText(eff.emoji, eff.x, eff.y - (1 - eff.life) * 60); ctx.restore();
         });
 
-        // 💖⭐✨ 慶祝粒子特效
+        // 💖⭐✨ 慶祝粒子特效 (文字)
         particleSystems.forEach(p => {
             ctx.save(); ctx.globalAlpha = p.life; ctx.font = `${p.size}px Arial`;
             ctx.fillText(p.emoji, p.x, p.y); ctx.restore();
         });
 
-        // 繪製跟隨身後的成員隊伍圖片 (包含 12 隻獨立恐龍及成員圖)
+        // 繪製跟隨身後的成員隊伍圖片
         let visibleFollowerCount = 0;
         activeFollowers.forEach((follower, index) => {
-            // 第一階段依序顯示已捕獲的恐龍；第二階段全部顯示
             const isVisible = (currentPhase === 1 && index < player.caughtDinos) || (currentPhase === 2);
             
             if(isVisible) {
@@ -897,9 +889,9 @@
                     const bounceOffset = Math.abs(Math.sin(Date.now() * 0.005 + visibleFollowerCount)) * -6; 
                     ctx.shadowColor = 'rgba(26, 47, 22, 0.28)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 5 - bounceOffset; 
                     
-                    // 根據是否已變身，第一階段讀取成員獨立恐龍 (dino_X)，第二階段讀取專屬成員人形 (member_X)
-                    const imgToDraw = follower.transformed ? images[`member_${follower.id}`] : images[`dino_${follower.id}`];
-                    const fSize = 60; 
+                    // 根據是否已變身，決定渲染恐龍還是專屬成員圖案
+                    const imgToDraw = follower.transformed ? images[`member_${follower.id}`] : images.dino;
+                    const fSize = 60; // 尾隨者顯示大小
                     drawImageCentered(ctx, imgToDraw, pos.x, pos.y + bounceOffset, fSize, fSize);
                     
                     ctx.restore();
