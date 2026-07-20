@@ -3,81 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MIRROR KIZUNA - 12恐龍捉迷藏 (星空特別版)</title>
-    <!-- Google Fonts for sophisticated typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;400;500;600;700&family=Noto+Serif+HK:wght@500;700;900&display=swap" rel="stylesheet">
-    <!-- Font Awesome for clean, elegant vector icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>MIRROR KIZUNA - 12恐龍捉迷藏 (星空下版)</title>
     <style>
         :root {
-            /* Phase 1 Garden Theme */
-            --egarden-green-dark: #132E1B; 
-            --egarden-green-leaf: #2C4C35; 
-            --egarden-green-light: #8CA174;
+            --egarden-green-dark: #1E351A; 
+            --egarden-green-leaf: #3A5A40; 
+            --egarden-green-light: #A3B18A;
             --biophilic-paper: #FDFBF7;    
-            --biophilic-earth: #221C16;    
+            --biophilic-earth: #2C251E;    
             --biophilic-sunlight: #FFFFFF;
-            
-            /* Phase 2 Starry Sky Theme */
-            --cosmic-deep: #090E1A;
-            --cosmic-nebula: #1C2B4D;
-            --cosmic-glow: #5D9CEC;
-            --cosmic-accent: #00F0FF;
-            --cosmic-glass: rgba(13, 23, 47, 0.75);
-            --cosmic-border: rgba(93, 156, 236, 0.25);
-            
-            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-            --error-red: #E74C3C;
-            --success-green: #2ECC71;
-            
-            --font-serif: "Noto Serif HK", "Playfair Display", serif;
-            --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-display: "Cinzel", serif;
+            --error-red: #D9534F;
+            --starry-blue-dark: #0A1224;
+            --starry-blue-mid: #152744;
+            --starry-blue-accent: #8EBCF3;
+            --starry-glow: rgba(142, 188, 243, 0.4);
         }
         
-        * { 
-            box-sizing: border-box; 
-            user-select: none; 
-            -webkit-user-select: none; 
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
         
         body { 
             margin: 0; padding: 0; 
-            font-family: var(--font-sans);
-            background-color: var(--egarden-green-dark); 
+            font-family: "Playfair Display", "PingFang HK", -apple-system, BlinkMacSystemFont, serif;
+            background-color: #1A2F16; 
             overflow: hidden; 
             touch-action: none;
             width: 100vw;
             height: 100vh;
             color: var(--biophilic-earth);
-            transition: background-color 2s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: background-color 1.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
         
-        body.starry-mode {
-            background-color: var(--cosmic-deep);
-            color: #F0F4F8;
-        }
+        canvas { display: block; }
         
-        canvas { 
-            display: block; 
-            position: absolute;
-            top: 0; left: 0;
-            z-index: 1;
-        }
-        
-        /* Tactical noise & stars overlay for cosmic luxury texture */
         .noise-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
             pointer-events: none;
-            z-index: 99;
+            z-index: 999;
         }
-
+        
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
             pointer-events: none;
@@ -87,127 +51,107 @@
         
         .hud {
             display: flex; justify-content: space-between; align-items: center;
-            padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 20px;
+            padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 20px;
             pointer-events: auto;
             width: 100%;
+            gap: 10px;
         }
 
-        .hud-left, .hud-right {
-            display: flex;
-            gap: 12px;
-            align-items: center;
+        .hud-group {
+            display: flex; gap: 10px; align-items: center;
         }
         
         .pill {
-            background: rgba(253, 251, 247, 0.85);
-            border: 1px solid rgba(44, 76, 53, 0.15);
+            background: rgba(253, 251, 247, 0.88);
+            border: 1px solid rgba(58, 90, 64, 0.18);
             padding: 10px 20px; 
-            border-radius: 20px; 
+            border-radius: 30px 10px 30px 10px; 
             font-weight: 600; 
             color: var(--biophilic-earth);
-            box-shadow: 0 10px 30px rgba(19, 46, 27, 0.08);
-            font-size: 13px;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 10px 25px rgba(30, 53, 26, 0.08);
+            font-size: 14px;
+            letter-spacing: 0.8px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(8px);
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .pill-btn {
+            cursor: pointer;
+            user-select: none;
+        }
+        .pill-btn:active {
+            transform: scale(0.92);
         }
         
         .pill.highlight {
             background: linear-gradient(135deg, #E6EBE0, var(--egarden-green-light));
             color: var(--egarden-green-dark);
             border: none;
-            box-shadow: 0 8px 25px rgba(140, 161, 116, 0.35);
+            box-shadow: 0 10px 25px rgba(163, 177, 138, 0.35);
             animation: breathe 2.5s infinite ease-in-out;
         }
 
-        /* Starry Mode HUD elements transition */
         body.starry-mode .pill {
-            background: var(--cosmic-glass);
-            border: 1px solid var(--cosmic-border);
-            color: #FFFFFF;
-            box-shadow: 0 8px 32px rgba(9, 14, 26, 0.5), 0 0 8px rgba(93, 156, 236, 0.15);
+            background: rgba(21, 39, 68, 0.75);
+            border: 1px solid rgba(142, 188, 243, 0.35);
+            color: #F0F4F8;
+            box-shadow: 0 10px 30px rgba(10, 18, 36, 0.5), 0 0 15px rgba(142, 188, 243, 0.15);
+            backdrop-filter: blur(12px);
         }
         
         body.starry-mode .pill.highlight {
-            background: linear-gradient(135deg, rgba(29, 42, 74, 0.9), rgba(0, 240, 255, 0.25));
-            color: #00F0FF;
-            border: 1px solid rgba(0, 240, 255, 0.4);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
-            text-shadow: 0 0 6px rgba(0, 240, 255, 0.5);
-        }
-
-        .sound-btn {
-            background: rgba(253, 251, 247, 0.85);
-            border: 1px solid rgba(44, 76, 53, 0.15);
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            color: var(--biophilic-earth);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(19, 46, 27, 0.08);
-            transition: all 0.3s ease;
-        }
-
-        body.starry-mode .sound-btn {
-            background: var(--cosmic-glass);
-            border: 1px solid var(--cosmic-border);
+            background: linear-gradient(135deg, #1F3D7A, #3B6BB0);
             color: #FFFFFF;
-            box-shadow: 0 8px 32px rgba(9, 14, 26, 0.5);
-        }
-
-        .sound-btn:active {
-            transform: scale(0.92);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 25px rgba(59, 107, 176, 0.5), 0 0 20px rgba(142, 188, 243, 0.4);
         }
 
         @keyframes breathe {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.04); }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
         }
 
-        /* Keyboard desktop helper hint */
-        .keyboard-hint {
+        .controls-hint {
             position: absolute;
             bottom: calc(20px + env(safe-area-inset-bottom, 0px));
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(19, 46, 27, 0.7);
-            color: #FFFFFF;
-            padding: 8px 16px;
+            background: rgba(253, 251, 247, 0.82);
+            padding: 8px 18px;
             border-radius: 20px;
-            font-size: 11px;
-            letter-spacing: 1px;
-            backdrop-filter: blur(5px);
+            font-size: 12px;
+            color: var(--egarden-green-dark);
             pointer-events: none;
-            opacity: 0.8;
-            z-index: 8;
-            transition: opacity 0.5s ease;
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(58, 90, 64, 0.15);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
+            white-space: nowrap;
         }
-        body.starry-mode .keyboard-hint {
-            background: rgba(13, 23, 47, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        body.starry-mode .controls-hint {
+            background: rgba(21, 39, 68, 0.8);
+            color: var(--starry-blue-accent);
+            border-color: rgba(142, 188, 243, 0.3);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
 
         .modal-container {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(19, 46, 27, 0.5); 
+            background: rgba(18, 32, 15, 0.55); 
             display: flex; 
             align-items: center;      
             justify-content: center;   
             opacity: 0; pointer-events: none; 
-            transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), background 0.8s ease;
             z-index: 100;
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(4px);
         }
 
         body.starry-mode .modal-container {
-            background: rgba(6, 10, 19, 0.75);
+            background: rgba(8, 14, 28, 0.72);
         }
         
         .modal-container.active {
@@ -216,25 +160,24 @@
         
         .modal {
             background: var(--biophilic-paper);
-            width: 90%; max-width: 420px;
-            border-radius: 28px; 
-            padding: 36px 28px; 
-            transform: scale(0.92) translateY(10px); 
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.5s, border-color 0.5s;
+            width: 90%; max-width: 440px;
+            border-radius: 36px 12px 36px 12px; 
+            padding: 38px 28px; 
+            transform: scale(0.88) translateY(10px); 
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), border 0.3s ease, background 0.5s ease;
             text-align: left; 
-            box-shadow: 0 30px 70px rgba(19, 46, 27, 0.3);
+            box-shadow: 0 20px 60px rgba(15, 28, 13, 0.28);
             position: relative;
             max-height: 85vh; 
             overflow-y: auto; 
             -webkit-overflow-scrolling: touch; 
-            border: 1px solid rgba(44, 76, 53, 0.1);
         }
 
         body.starry-mode .modal {
-            background: linear-gradient(145deg, #0e172a 0%, #152445 100%);
+            background: linear-gradient(160deg, #111D35 0%, #0A1326 100%);
             color: #F0F4F8;
-            border: 1px solid rgba(93, 156, 236, 0.35);
-            box-shadow: 0 30px 80px rgba(4, 7, 13, 0.8), 0 0 20px rgba(93, 156, 236, 0.15);
+            border: 1px solid rgba(142, 188, 243, 0.35);
+            box-shadow: 0 20px 60px rgba(5, 12, 28, 0.7), 0 0 30px rgba(142, 188, 243, 0.15);
         }
 
         @keyframes shakeError {
@@ -244,87 +187,77 @@
         }
         
         .modal.error-shake {
-            animation: shakeError 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            animation: shakeError 0.6s cubic-bezier(.36,.07,.19,.97) both;
             border: 2px solid var(--error-red) !important;
-            box-shadow: 0 20px 60px rgba(231, 76, 60, 0.25);
+            box-shadow: 0 20px 60px rgba(217, 83, 79, 0.25) !important;
         }
         
-        /* Decorative corner symbols mimicking classic constellation map aesthetics */
         .modal::before {
-            content: "✦"; 
-            position: absolute; top: 25px; right: 28px;
-            font-size: 24px; color: var(--egarden-green-light);
-            opacity: 0.5;
-            transition: color 0.5s;
+            content: "🌿"; 
+            position: absolute; top: 25px; right: 30px;
+            font-size: 32px; opacity: 0.12;
+            filter: grayscale(1);
+            transition: all 0.4s ease;
         }
 
         body.starry-mode .modal::before {
-            content: "✦";
-            color: var(--cosmic-accent);
-            text-shadow: 0 0 8px var(--cosmic-accent);
-            opacity: 0.85;
+            content: "✨";
+            opacity: 0.28;
+            filter: none;
+            text-shadow: 0 0 10px rgba(142, 188, 243, 0.8);
         }
         
-        .modal-container.active .modal { 
-            transform: scale(1) translateY(0); 
-        }
+        .modal-container.active .modal { transform: scale(1) translateY(0); }
         
-        .center-text-modal .modal {
-            text-align: center;
-        }
+        .center-text-modal .modal { text-align: center; }
+        .center-text-modal .modal::before { display: none; }
         
         .emoji-art { 
-            font-size: 48px; 
-            margin-bottom: 22px; 
-            display: inline-block; 
-            filter: drop-shadow(0 8px 15px rgba(19,46,27,0.15));
-            transition: filter 0.5s;
+            font-size: 52px; margin-bottom: 18px; display: inline-block; 
+            filter: drop-shadow(0 8px 15px rgba(58,90,64,0.18)); 
+            transition: filter 0.4s ease;
         }
 
         body.starry-mode .emoji-art {
-            filter: drop-shadow(0 0 12px var(--cosmic-glow));
+            filter: drop-shadow(0 0 15px rgba(142, 188, 243, 0.5));
         }
         
         .modal h2 { 
             margin: 0 0 8px; 
-            font-size: 23px; 
+            font-size: 24px; 
             color: var(--egarden-green-dark); 
-            font-weight: 800; 
+            font-weight: 700; 
             letter-spacing: 0.5px;
-            font-family: var(--font-serif);
-            padding-right: 25px; 
-            transition: color 0.5s ease;
+            font-family: serif;
+            padding-right: 30px; 
+            transition: color 0.3s ease;
         }
 
         body.starry-mode .modal h2 {
-            color: #FFFFFF;
-            font-family: var(--font-display);
-            letter-spacing: 1px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.1);
+            color: #8EBCF3;
+            text-shadow: 0 0 12px rgba(142, 188, 243, 0.3);
         }
         
         .modal .subtitle {
             font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 2.5px;
             color: var(--egarden-green-light);
-            margin-bottom: 24px;
+            margin-bottom: 22px;
             display: block;
-            font-weight: 700;
-            transition: color 0.5s ease;
+            font-weight: 600;
+            transition: color 0.3s ease;
         }
 
         body.starry-mode .modal .subtitle {
-            color: var(--cosmic-accent);
-            text-shadow: 0 0 5px rgba(0, 240, 255, 0.4);
+            color: #6C9BD2;
         }
         
         .modal p { 
-            color: #4A443C; 
-            font-size: 14px; 
+            color: #554E45; 
+            font-size: 15px; 
             margin-bottom: 26px; 
-            line-height: 1.7; 
-            transition: color 0.5s;
+            line-height: 1.65; 
         }
 
         body.starry-mode .modal p {
@@ -334,144 +267,111 @@
         .btn {
             background: linear-gradient(135deg, var(--egarden-green-dark), var(--egarden-green-leaf));
             color: #FDFBF7; border: none;
-            width: 100%; padding: 15px 24px; 
-            border-radius: 16px; 
-            font-size: 15px; font-weight: 600; margin-bottom: 10px;
+            width: 100%; padding: 16px 24px; 
+            border-radius: 24px 8px 24px 8px; 
+            font-size: 16px; font-weight: 600; margin-bottom: 12px;
             cursor: pointer; 
             text-align: center;
-            box-shadow: 0 8px 20px rgba(19, 46, 27, 0.2);
-            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            letter-spacing: 0.5px;
-            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 8px 20px rgba(30, 53, 26, 0.18);
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            display: block;
+            letter-spacing: 1px;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-            box-shadow: 0 12px 24px rgba(19, 46, 27, 0.3);
-        }
-
         .btn:active { 
-            transform: translateY(1px); 
-            filter: brightness(0.95); 
+            transform: scale(0.975); 
+            filter: brightness(1.15); 
+            box-shadow: 0 3px 8px rgba(30, 53, 26, 0.1);
         }
 
         body.starry-mode .btn {
-            background: linear-gradient(135deg, #1A2E5C 0%, #294A8F 100%);
-            border: 1px solid rgba(93, 156, 236, 0.4);
-            box-shadow: 0 8px 25px rgba(13, 23, 47, 0.6);
+            background: linear-gradient(135deg, #1F3D7A, #3B6BB0);
+            border: 1px solid rgba(142, 188, 243, 0.3);
+            box-shadow: 0 8px 25px rgba(12, 22, 42, 0.5), 0 0 15px rgba(59, 107, 176, 0.3);
         }
-
-        body.starry-mode .btn:hover {
-            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.25), 0 0 10px rgba(93, 156, 236, 0.3);
-            border-color: #00F0FF;
+        body.starry-mode .btn:active {
+            box-shadow: 0 3px 10px rgba(12, 22, 42, 0.3), 0 0 20px rgba(142, 188, 243, 0.5);
         }
         
         .btn-outline { 
-            background: rgba(255, 255, 255, 0.6); 
+            background: rgba(255, 255, 255, 0.75); 
             color: var(--egarden-green-dark); 
-            border: 1.5px solid rgba(44, 76, 53, 0.15);
+            border: 1.5px solid rgba(58, 90, 64, 0.22);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
             text-align: left;
-            padding-left: 20px;
+            padding-left: 22px;
             position: relative;
-            justify-content: flex-start;
         }
         .btn-outline::after {
-            content: "𐩒";
-            position: absolute; right: 20px; top: 50%;
+            content: "◦";
+            position: absolute; right: 22px; top: 50%;
             transform: translateY(-50%);
-            font-size: 16px; color: var(--egarden-green-light);
-            font-weight: bold;
+            font-size: 20px; color: var(--egarden-green-light);
         }
-        .btn-outline:hover {
-            background: #FFFFFF;
+        .btn-outline:active { 
+            background: #EDF1E9;
             border-color: var(--egarden-green-leaf);
-            color: var(--egarden-green-dark);
-            box-shadow: 0 6px 18px rgba(44, 76, 53, 0.1);
+            color: #1A3A1A;
         }
 
         body.starry-mode .btn-outline {
-            background: rgba(13, 23, 47, 0.5);
-            color: #E2E8F0;
-            border: 1px solid rgba(93, 156, 236, 0.2);
-            box-shadow: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: #F0F4F8;
+            border: 1.5px solid rgba(142, 188, 243, 0.22);
         }
 
         body.starry-mode .btn-outline::after {
-            color: var(--cosmic-accent);
+            color: #8EBCF3;
         }
 
-        body.starry-mode .btn-outline:hover {
-            background: rgba(26, 42, 82, 0.75);
-            border-color: #00F0FF;
+        body.starry-mode .btn-outline:active {
+            background: rgba(142, 188, 243, 0.18);
+            border-color: #8EBCF3;
             color: #FFFFFF;
         }
         
-        #qOptions { display: flex; flex-direction: column; gap: 10px; }
+        #qOptions { display: flex; flex-direction: column; gap: 8px; }
 
         .joystick-container {
-            position: absolute; width: 96px; height: 96px;
-            background: rgba(253, 251, 247, 0.25);
-            border: 1.5px solid rgba(140, 161, 116, 0.4); border-radius: 50%;
+            position: absolute; width: 90px; height: 90px;
+            background: rgba(253, 251, 247, 0.18);
+            border: 1.5px solid rgba(163, 177, 138, 0.4); border-radius: 50%;
             pointer-events: none; display: none; transform: translate(-50%, -50%);
-            z-index: 5; box-shadow: 0 10px 25px rgba(19, 46, 27, 0.15);
-            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-            transition: opacity 0.2s ease;
+            z-index: 5; box-shadow: 0 8px 24px rgba(26, 47, 22, 0.15);
+            backdrop-filter: blur(3px); transition: opacity 0.15s ease;
         }
 
         body.starry-mode .joystick-container {
-            background: rgba(13, 23, 47, 0.35);
-            border: 1.5px solid rgba(93, 156, 236, 0.3);
-            box-shadow: 0 0 15px rgba(93, 156, 236, 0.2);
+            background: rgba(142, 188, 243, 0.1);
+            border: 1.5px solid rgba(142, 188, 243, 0.35);
+            box-shadow: 0 8px 25px rgba(10, 18, 36, 0.4), 0 0 15px rgba(142, 188, 243, 0.2);
         }
 
         .joystick-knob {
             position: absolute; left: calc(50% - 18px); top: calc(50% - 18px);
             width: 36px; height: 36px; border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, var(--egarden-green-light) 0%, var(--egarden-green-leaf) 100%);
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.25);
+            background: radial-gradient(circle, var(--egarden-green-light) 0%, var(--egarden-green-leaf) 100%);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         body.starry-mode .joystick-knob {
-            background: radial-gradient(circle at 35% 35%, var(--cosmic-glow) 0%, #1A2E5C 100%);
-            box-shadow: 0 0 10px var(--cosmic-glow);
+            background: radial-gradient(circle, #8EBCF3 0%, #1F3D7A 100%);
+            box-shadow: 0 0 12px rgba(142, 188, 243, 0.6);
         }
         
         #loadingOverlay {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: var(--egarden-green-dark); display: flex; flex-direction: column;
+            background: #1A2F16; display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 9999;
-            color: var(--biophilic-sunlight); transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            color: var(--biophilic-sunlight); transition: opacity 0.6s ease;
         }
-        #loadingOverlay p { margin-top: 20px; font-size: 13px; letter-spacing: 2px; opacity: 0.9; }
-
-        /* Custom simple scrollbar inside dialogs */
-        .modal::-webkit-scrollbar {
-            width: 5px;
-        }
-        .modal::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .modal::-webkit-scrollbar-thumb {
-            background: rgba(140, 161, 116, 0.3);
-            border-radius: 10px;
-        }
-        body.starry-mode .modal::-webkit-scrollbar-thumb {
-            background: rgba(93, 156, 236, 0.3);
-        }
+        #loadingOverlay p { margin-top: 20px; font-size: 14px; letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
     <div id="loadingOverlay">
-        <!-- Modern pulsating loader icon -->
-        <div style="font-size: 44px; animation: breathe 1.8s infinite ease-in-out;">✦</div>
-        <p id="loadingText">載入星河漫步空間...</p>
+        <div style="font-size: 40px; animation: breathe 2s infinite ease-in-out;">🌿</div>
+        <p id="loadingText">載入專屬資產與星海音訊中...</p>
     </div>
 
     <div class="noise-overlay"></div>
@@ -484,30 +384,24 @@
 
     <div id="ui-layer">
         <div class="hud" id="hud" style="display:none;">
-            <div class="hud-left">
+            <div class="hud-group">
                 <div class="pill" id="timerDisplay">⏱️ 00:00</div>
                 <div class="pill" id="scoreDisplay">🦖 0 / 12</div>
             </div>
-            <div class="hud-right">
-                <button class="sound-btn" id="soundToggleBtn" onclick="toggleMute()" title="切換音效">
-                    <i id="soundIcon" class="fa-solid fa-volume-high"></i>
-                </button>
+            <div class="hud-group">
+                <div class="pill pill-btn" id="audioToggleBtn" onclick="toggleAudio()"><span id="audioIcon">🎵</span></div>
             </div>
         </div>
-        <div class="keyboard-hint" id="keyboardHint" style="display:none;">
-            使用 <span>W A S D</span> 或 <span>方向鍵</span> 漫步探索
-        </div>
+        <div class="controls-hint" id="controlsHint">💡 鍵盤 WASD / 方向鍵 或 觸控搖桿皆可移動</div>
     </div>
 
     <div class="modal-container center-text-modal" id="startScreen">
         <div class="modal">
-            <div class="emoji-art">🌱🏕️🦕</div>
+            <div class="emoji-art">🍀🌼⛺</div>
             <h2>MIRROR - KIZUNA</h2>
-            <span class="subtitle">12恐龍捉迷藏 · 星海漫步版</span>
+            <span class="subtitle">12恐龍捉迷藏 專屬視覺版</span>
             <p>歡迎來到極簡綠植藝術空間。<br>在陽光散落的林間尋找 12 隻隱藏的恐龍，<br>答對植物與團體謎題，並將牠們引導回中央大本營。</p>
-            <button class="btn" onclick="startGame()">
-                <i class="fa-solid fa-compass"></i> 踏入漫步
-            </button>
+            <button class="btn" onclick="startGame()">踏入漫步</button>
         </div>
     </div>
 
@@ -522,171 +416,153 @@
 
     <div class="modal-container center-text-modal" id="campHintScreen">
         <div class="modal">
-            <div class="emoji-art">⛺🏕️🍀</div>
+            <div class="emoji-art">⛺✨🍀</div>
             <h2>KIZUNA 羈絆已建立</h2>
             <span class="subtitle">MISSION 1 COMPLETED</span>
             <p>做得很好，12 隻 MIRROR 恐龍已被成功收服。<br>現在，請伴隨隊伍回到地圖正中央的 <strong>大本營</strong> 集合，開啟下一階段的新任務！</p>
-            <button class="btn" style="background: linear-gradient(135deg, var(--egarden-green-leaf), #556B2F);" onclick="closeCampHint()">
-                <i class="fa-solid fa-campground"></i> 回歸大本營
-            </button>
+            <button class="btn" style="background: linear-gradient(135deg, var(--egarden-green-leaf), #556B2F);" onclick="closeCampHint()">回歸大本營</button>
         </div>
     </div>
 
     <div class="modal-container center-text-modal" id="phase2StartScreen">
         <div class="modal">
-            <div class="emoji-art">🌌⛺✨</div>
-            <h2>觸發全新任務！</h2>
-            <span class="subtitle" style="color:var(--cosmic-accent);">PHASE 2: MEMORIES SHATTERED</span>
-            <p>星辰移位！恐龍們受到星海魔法召喚，重新隱藏於四處！<br><br>請再次踏入林間尋找隱秘的<strong>三葉草</strong>。這一次，整片原野將幻化為<strong>神祕星海</strong>！你需要回答成員個人專屬與生日問題，讓身邊跟隨的恐龍覺醒為成員的<strong>專屬守护形象</strong>！<br>全部變身成功後再帶領整隊人馬回大本營集合吧！</p>
-            <button class="btn" onclick="startPhase2()">
-                <i class="fa-solid fa-moon"></i> 接受星宿任務
-            </button>
+            <div class="emoji-art">🌌✨💫</div>
+            <h2>觸發新任務！</h2>
+            <span class="subtitle">PHASE 2: MEMORIES SHATTERED</span>
+            <p>境遷時移！恐龍們受到星辰魔法召喚，重新隱藏於四處！<br><br>請再次踏入林間尋找隱秘的<strong>三葉草</strong>。這一次，整片原野將幻化為<strong>神祕星海</strong>！你需要回答成員個人專屬與生日問題，讓身邊跟隨的恐龍覺醒為成員的<strong>專屬守護形象</strong>！<br>全部變身成功後再帶領整隊人馬回大本營集合吧！</p>
+            <button class="btn" onclick="startPhase2()">接受新任務</button>
         </div>
     </div>
 
     <div class="modal-container center-text-modal" id="phase2EndHintScreen">
         <div class="modal">
-            <div class="emoji-art">🎪🌌💫</div>
+            <div class="emoji-art">⛺🌈🌟</div>
             <h2>所有成員已歸位！</h2>
-            <span class="subtitle" style="color:var(--cosmic-accent);">FINAL CALL</span>
-            <p>恭喜！你已為全體 12 位成員尋回專屬形象與記憶！<br>現在，帶著整支 MIRROR 隊伍回到地圖正中央的 <strong>星海大本營</strong> 進行最後的慶典吧！</p>
-            <button class="btn" style="background: linear-gradient(135deg, #1F3D7A, #3B6BB0);" onclick="closePhase2EndHint()">
-                <i class="fa-solid fa-circle-nodes"></i> 回到營地舉行儀式
-            </button>
+            <span class="subtitle">FINAL CALL</span>
+            <p>恭喜！你已為全體 12 位成員尋回專屬形象與記憶！<br>現在，帶著整支 MIRROR 隊伍回到地圖正中央的 <strong>大本營</strong> 進行最後的慶典吧！</p>
+            <button class="btn" style="background: linear-gradient(135deg, #1F3D7A, #3B6BB0);" onclick="closePhase2EndHint()">回到大本營</button>
         </div>
     </div>
 
     <div class="modal-container center-text-modal" id="endScreen">
         <div class="modal">
-            <div class="emoji-art">🌌🎆🏆</div>
+            <div class="emoji-art">🏛️🏆⛺</div>
             <h2>旅程圓滿結束</h2>
             <span class="subtitle">MIRROR - KIZUNA</span>
-            <p>你已成功將所有 MIRROR 隊員與他們的專屬記憶帶回星海營地！<br>星海漫步總耗時：<strong id="finalTime" style="font-size:18px;color:#00F0FF;">00:00</strong></p>
-            <button class="btn" onclick="window.open('https://lnk.to/MirrorKIZUNA?utm_source=ig&utm_medium=social&utm_content=link_in_bio', '_blank')">
-                <i class="fa-solid fa-music"></i> 聆聽 MIRROR - KIZUNA
-            </button>
-            <button class="btn" style="background: rgba(255, 255, 255, 0.08); color: #E2E8F0; box-shadow: none; border: 1px solid rgba(255,255,255,0.1);" onclick="location.reload()">
-                <i class="fa-solid fa-rotate-left"></i> 重新探索星野
-            </button>
+            <p>你已成功將所有 MIRROR 隊員與他們的專屬記憶帶回星海營地！<br>漫步總耗時：<strong id="finalTime">00:00</strong></p>
+            <button class="btn" onclick="playClickSound(); window.open('https://lnk.to/MirrorKIZUNA?utm_source=ig&utm_medium=social&utm_content=link_in_bio', '_blank')">🎵 聆聽 MIRROR - KIZUNA</button>
+            <button class="btn" style="background: rgba(58, 90, 64, 0.08); color: var(--egarden-green-dark); box-shadow: none;" onclick="playClickSound(); location.reload()">重新探索空間</button>
         </div>
     </div>
 
 <script>
-    let isSoundMuted = false;
-    let audioCtx = null;
+    // ----------------- 音訊合成器 & BGM 管理 -----------------
+    const AudioEngine = {
+        ctx: null,
+        muted: false,
+        bgm: null,
+        bgmGain: null,
+        
+        init() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) this.ctx = new AudioCtx();
+            } catch(e) { console.log('Web Audio Context 不受支援'); }
 
-    function initAudioContext() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-    }
+            // 預載入背景音樂 (assets/bgm.mp3)
+            this.bgm = new Audio('assets/bgm.mp3');
+            this.bgm.loop = true;
+            this.bgm.volume = 0.45;
+        },
+        
+        resume() {
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        },
 
-    // High quality synths with Web Audio API (No dependencies, guarantees game sounds)
-    function playSound(type) {
-        if (isSoundMuted) return;
-        try {
-            initAudioContext();
-            const now = audioCtx.currentTime;
+        playBGM() {
+            if (!this.bgm) return;
+            this.bgm.play().then(() => {
+                this.bgm.muted = this.muted;
+            }).catch(e => {
+                console.log('BGM 自動播放等待互動：', e);
+            });
+        },
+
+        pauseBGM() {
+            if (this.bgm) this.bgm.pause();
+        },
+
+        playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+            if (this.muted || !this.ctx) return;
+            this.resume();
             
-            if (type === 'select') {
-                // Gentle bubble UI click
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(440, now);
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
-                gain.gain.setValueAtTime(0.12, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(now);
-                osc.stop(now + 0.1);
-            } 
-            else if (type === 'correct') {
-                // Rising starry/magical chime
-                [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-                    gain.gain.setValueAtTime(0.1, now + idx * 0.08);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.25);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(now + idx * 0.08);
-                    osc.stop(now + idx * 0.08 + 0.25);
-                });
-            } 
-            else if (type === 'wrong') {
-                // Low sad mechanical rumble
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(220, now);
-                osc.frequency.linearRampToValueAtTime(110, now + 0.4);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(now);
-                osc.stop(now + 0.4);
-            }
-            else if (type === 'shift') {
-                // Celestial sweeps
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                const filter = audioCtx.createBiquadFilter();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(150, now);
-                osc.frequency.exponentialRampToValueAtTime(1200, now + 1.2);
-                filter.type = 'lowpass';
-                filter.Q.setValueAtTime(5, now);
-                filter.frequency.setValueAtTime(200, now);
-                filter.frequency.exponentialRampToValueAtTime(2000, now + 1.2);
-                gain.gain.setValueAtTime(0.01, now);
-                gain.gain.linearRampToValueAtTime(0.15, now + 0.3);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
-                osc.connect(filter);
-                filter.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(now);
-                osc.stop(now + 1.2);
-            }
-            else if (type === 'victory') {
-                // Glorious celebration flourish
-                const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51, 1567.98, 2093.0];
-                notes.forEach((freq, idx) => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
-                    osc.frequency.setValueAtTime(freq, now + idx * 0.06);
-                    gain.gain.setValueAtTime(0.08, now + idx * 0.06);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.06 + 0.4);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(now + idx * 0.06);
-                    osc.stop(now + idx * 0.06 + 0.4);
-                });
-            }
-        } catch(e) {
-            console.log("Audio failed to play", e);
-        }
-    }
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            
+            gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+            
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            
+            osc.start();
+            osc.stop(this.ctx.currentTime + duration);
+        },
 
-    function toggleMute() {
-        isSoundMuted = !isSoundMuted;
-        const icon = document.getElementById('soundIcon');
-        if (isSoundMuted) {
-            icon.className = 'fa-solid fa-volume-xmark';
-        } else {
-            icon.className = 'fa-solid fa-volume-high';
-            playSound('select');
-        }
-    }
+        playSuccess() {
+            if (this.muted) return;
+            this.playTone(523.25, 'sine', 0.12, 0.12); 
+            setTimeout(() => this.playTone(659.25, 'sine', 0.12, 0.12), 80); 
+            setTimeout(() => this.playTone(783.99, 'sine', 0.25, 0.15), 160); 
+        },
 
+        playError() {
+            if (this.muted) return;
+            this.playTone(220, 'sawtooth', 0.15, 0.12);
+            setTimeout(() => this.playTone(174.61, 'sawtooth', 0.25, 0.12), 120);
+        },
+
+        playPhaseShift() {
+            if (this.muted) return;
+            const freqs = [392, 523.25, 659.25, 783.99, 1046.5];
+            freqs.forEach((f, i) => {
+                setTimeout(() => this.playTone(f, 'sine', 0.3, 0.08), i * 90);
+            });
+        },
+
+        playWinFanfare() {
+            if (this.muted) return;
+            const melody = [
+                {f: 523.25, d: 0.15}, {f: 659.25, d: 0.15}, {f: 783.99, d: 0.15}, 
+                {f: 1046.5, d: 0.4}
+            ];
+            melody.forEach((note, i) => {
+                setTimeout(() => this.playTone(note.f, 'triangle', note.d, 0.15), i * 140);
+            });
+        }
+    };
+
+    AudioEngine.init();
+
+    window.toggleAudio = function() {
+        AudioEngine.muted = !AudioEngine.muted;
+        document.getElementById('audioIcon').innerText = AudioEngine.muted ? '🔇' : '🎵';
+        if (AudioEngine.bgm) {
+            AudioEngine.bgm.muted = AudioEngine.muted;
+            if (!AudioEngine.muted && gameState !== 'start') {
+                AudioEngine.playBGM();
+            }
+        }
+    };
+
+    function playClickSound() { AudioEngine.playTone(600, 'sine', 0.08, 0.05); }
+
+    // ----------------- Canvas 畫布設定 -----------------
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const dpr = Math.min(window.devicePixelRatio || 1, 2); 
@@ -698,7 +574,7 @@
     }
     window.addEventListener('resize', resize); resize();
 
-    // Graphic Asset Preload Mechanism
+    // 預載入圖片資產系統
     const assetsData = {
         player: 'assets/player.png',
         camp: 'assets/camp.png',
@@ -741,15 +617,14 @@
                 setTimeout(() => { 
                     overlay.style.display = 'none'; 
                     document.getElementById('startScreen').classList.add('active');
-                }, 500);
+                }, 600);
             }
         };
         images[key].onerror = () => {
-            // Generating premium stylized SVG/Canvas fallbacks dynamically
             const canvasFallback = document.createElement('canvas');
             canvasFallback.width = 64; canvasFallback.height = 64;
             const cctx = canvasFallback.getContext('2d');
-            cctx.font = '36px Arial'; cctx.textAlign = 'center'; cctx.textBaseline = 'middle';
+            cctx.font = '34px Arial'; cctx.textAlign = 'center'; cctx.textBaseline = 'middle';
             
             if(key === 'player') cctx.fillText('🏃', 32, 32);
             else if(key === 'camp' || key === 'camp_p2') cctx.fillText('⛺', 32, 32);
@@ -763,11 +638,13 @@
                 cctx.fillText(emojis[idx % 12], 32, 32);
             }
             images[key].src = canvasFallback.toDataURL();
+            images[key].onload();
         };
         images[key].src = assetsData[key];
     }
 
-    const WORLD_SIZE = 1400;
+    // ----------------- 遊戲核心參數 -----------------
+    const WORLD_SIZE = 1300;
     let gameState = 'start'; 
     let currentPhase = 1; 
     let startTime = 0, timerInterval = null, timeElapsed = 0;
@@ -776,27 +653,13 @@
     const CAMP_CENTER_Y = WORLD_SIZE / 2;
     let camera = { x: CAMP_CENTER_X, y: CAMP_CENTER_Y };
 
-    // Joystick + Keyboard Controls
+    // 輸入控制（觸控搖桿 & 鍵盤）
     let input = { isDown: false, startX: 0, startY: 0, curX: 0, curY: 0, vectorX: 0, vectorY: 0 };
+    const keysPressed = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, w: false, a: false, s: false, d: false };
+
     const joystickEl = document.getElementById('joystick');
     const joystickKnobEl = document.getElementById('joystick-knob');
     const MAX_JOYSTICK_DIST = 45, DEADZONE = 5;          
-
-    // Keyboard states
-    const keysPressed = {};
-    window.addEventListener('keydown', e => {
-        const key = e.key.toLowerCase();
-        if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
-            keysPressed[key] = true;
-            document.getElementById('keyboardHint').style.opacity = '0.3';
-        }
-    });
-    window.addEventListener('keyup', e => {
-        const key = e.key.toLowerCase();
-        if (key in keysPressed) {
-            delete keysPressed[key];
-        }
-    });
 
     const player = {
         x: CAMP_CENTER_X, y: CAMP_CENTER_Y,
@@ -809,9 +672,9 @@
     const camp = { x: CAMP_CENTER_X, y: CAMP_CENTER_Y, size: 120 }; 
     let visualEffects = [], particleSystems = [];
     const starryParticles = []; 
-    const shootingStars = []; // Added for starry ambiance
+    const shootingStars = [];
 
-    const phase1Questions = [
+        const phase1Questions = [
         { q: "MIRROR 正式的出道日期是哪一天？", options: ["2018年11月3日", "2018年10月3日", "2019年1月1日"], ans: 0 },
         { q: "MIRROR 名字的含意是什麼？", options: ["面對自己真實一面", "象徵鏡子能反射無限可能，每位成員都是獨特鏡面", "代表每位成員不同面向"], ans: 1 },
         { q: "MIRROR 共有多少位成員？", options: ["7位", "12位", "14位"], ans: 1 },
@@ -954,19 +817,19 @@
             ]
         }
     ];
-
+    // 生成邊界障礙物位置數據
     const borders = [];
-    for(let i = 0; i <= WORLD_SIZE; i += 60) {
+    for(let i = 0; i <= WORLD_SIZE; i += 50) {
         borders.push({x: i, y: 0}); borders.push({x: i, y: WORLD_SIZE});
         borders.push({x: 0, y: i}); borders.push({x: WORLD_SIZE, y: i});
     }
 
+    // 生成隨機森林樹木
     const trees = [];
-    for(let i=0; i<60; i++) {
+    for(let i=0; i<65; i++) {
         let tx, ty, valid = false, attempts = 0;
         do {
-            tx = Math.random() * (WORLD_SIZE - 120) + 60; 
-            ty = Math.random() * (WORLD_SIZE - 120) + 60;
+            tx = Math.random() * (WORLD_SIZE - 100) + 50; ty = Math.random() * (WORLD_SIZE - 100) + 50;
             if (Math.hypot(tx - camp.x, ty - camp.y) < 180) continue;
             valid = true;
             for (let existing of trees) {
@@ -976,12 +839,12 @@
         } while (!valid && attempts < 80);
         
         if (valid) {
-            const treeSize = Math.random() * 20 + 75;
+            const treeSize = Math.random() * 20 + 70;
             trees.push({
                 x: tx, y: ty,
                 imgKey: ['tree1','tree2','tree3'][Math.floor(Math.random()*3)],
                 size: treeSize,
-                radius: treeSize * 0.3,
+                radius: treeSize * 0.28,
                 angle: Math.random() * Math.PI * 2
             });
         }
@@ -1003,8 +866,7 @@
     function getRandomDispersedPosition() {
         let rx, ry, valid = false, attempts = 0;
         while (!valid && attempts < 150) {
-            rx = Math.random() * (WORLD_SIZE - 260) + 130; 
-            ry = Math.random() * (WORLD_SIZE - 260) + 130;
+            rx = Math.random() * (WORLD_SIZE - 260) + 130; ry = Math.random() * (WORLD_SIZE - 260) + 130;
             valid = true;
             if (Math.hypot(rx - camp.x, ry - camp.y) < 250) valid = false;
             if (valid && Math.hypot(rx - player.x, ry - player.y) < 250) valid = false;
@@ -1036,7 +898,7 @@
 
     for(let i = 0; i < 6; i++) { spawnDino(); }
 
-    // Double canvas setup for static maps
+    // 建立 Background Canvas
     const bgCanvas = document.createElement('canvas');
     bgCanvas.width = WORLD_SIZE; bgCanvas.height = WORLD_SIZE;
     const bgCtx = bgCanvas.getContext('2d');
@@ -1046,50 +908,56 @@
         return `rgba(${r}, ${g}, ${b}, ${a})`;
     }
 
+    // 繪製第一階段常規草地場景
     function drawGrassBackground() {
-        bgCtx.fillStyle = '#112213'; bgCtx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+        bgCtx.fillStyle = '#1A3017'; bgCtx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
         const gradientData = [
-            {x: 0.15, y: 0.15, color: '#1B351E'}, {x: 0.85, y: 0.20, color: '#27442B'}, 
-            {x: 0.20, y: 0.80, color: '#0B170C'}, {x: 0.75, y: 0.75, color: '#314E36'},
-            {x: 0.50, y: 0.50, color: '#172B19'}
+            {x: 0.15, y: 0.15, color: '#2B4C24'}, {x: 0.85, y: 0.20, color: '#3A5A40'}, 
+            {x: 0.20, y: 0.80, color: '#152513'}, {x: 0.75, y: 0.75, color: '#4F6D48'},
+            {x: 0.50, y: 0.50, color: '#22381E'}
         ];
         gradientData.forEach(g => {
             const radGrad = bgCtx.createRadialGradient(g.x * WORLD_SIZE, g.y * WORLD_SIZE, 0, g.x * WORLD_SIZE, g.y * WORLD_SIZE, WORLD_SIZE * 0.85);
-            radGrad.addColorStop(0, hexToRgba(g.color, 1)); 
-            radGrad.addColorStop(0.6, hexToRgba(g.color, 0.4)); 
-            radGrad.addColorStop(1, 'rgba(0,0,0,0)');
+            radGrad.addColorStop(0, hexToRgba(g.color, 1)); radGrad.addColorStop(0.55, hexToRgba(g.color, 0.45)); radGrad.addColorStop(1, hexToRgba(g.color, 0));
             bgCtx.fillStyle = radGrad; bgCtx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
         });
 
-        // Center camp visual footprint
-        bgCtx.fillStyle = '#E5DEC9'; bgCtx.beginPath(); bgCtx.arc(camp.x, camp.y, 85, 0, Math.PI * 2); bgCtx.fill();
-        bgCtx.strokeStyle = '#B3A993'; bgCtx.lineWidth = 3; bgCtx.setLineDash([8, 12]); bgCtx.stroke(); bgCtx.setLineDash([]);
+        bgCtx.fillStyle = '#E6DCCF'; bgCtx.beginPath(); bgCtx.arc(camp.x, camp.y, 75, 0, Math.PI * 2); bgCtx.fill();
+        bgCtx.strokeStyle = '#C5B7A5'; bgCtx.lineWidth = 3; bgCtx.setLineDash([8, 12]); bgCtx.stroke(); bgCtx.setLineDash([]);
     }
 
+    // 繪製第二階段星海場景
     function drawSpaceBackground() {
         bgCtx.clearRect(0, 0, WORLD_SIZE, WORLD_SIZE);
         
-        // Deep magical galaxy gradient
         const radGrad = bgCtx.createRadialGradient(
-            WORLD_SIZE / 2, WORLD_SIZE / 2, 50,
+            WORLD_SIZE / 2, WORLD_SIZE / 2, 0,
             WORLD_SIZE / 2, WORLD_SIZE / 2, WORLD_SIZE * 0.75
         );
-        radGrad.addColorStop(0, '#10254C');
-        radGrad.addColorStop(0.4, '#0B162B');
-        radGrad.addColorStop(1, '#050914');
+        radGrad.addColorStop(0, 'rgba(38, 115, 185, 1)');
+        radGrad.addColorStop(0.55, 'rgba(21, 55, 115, 1)');
+        radGrad.addColorStop(1, 'rgba(10, 18, 36, 1)');
         
         bgCtx.fillStyle = radGrad;
         bgCtx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
 
-        // Center space station orbit circle
-        bgCtx.fillStyle = 'rgba(93, 156, 236, 0.05)'; bgCtx.beginPath(); bgCtx.arc(camp.x, camp.y, 95, 0, Math.PI * 2); bgCtx.fill();
-        bgCtx.strokeStyle = 'rgba(0, 240, 255, 0.3)'; bgCtx.lineWidth = 2.5; bgCtx.setLineDash([6, 10]); bgCtx.stroke(); bgCtx.setLineDash([]);
+        bgCtx.fillStyle = 'rgba(253, 251, 247, 0.08)'; bgCtx.beginPath(); bgCtx.arc(camp.x, camp.y, 85, 0, Math.PI * 2); bgCtx.fill();
+        bgCtx.strokeStyle = 'rgba(142, 188, 243, 0.4)'; bgCtx.lineWidth = 2; bgCtx.setLineDash([6, 8]); bgCtx.stroke(); bgCtx.setLineDash([]);
     }
 
-    // First paint
     drawGrassBackground();
 
     let currentDinoIndex = -1;
+
+    // 鍵盤操控監聽
+    window.addEventListener('keydown', (e) => {
+        if (e.key in keysPressed) { keysPressed[e.key] = true; }
+        if (['w', 'a', 's', 'd', 'W', 'A', 'S', 'D'].includes(e.key)) { keysPressed[e.key.toLowerCase()] = true; }
+    });
+    window.addEventListener('keyup', (e) => {
+        if (e.key in keysPressed) { keysPressed[e.key] = false; }
+        if (['w', 'a', 's', 'd', 'W', 'A', 'S', 'D'].includes(e.key)) { keysPressed[e.key.toLowerCase()] = false; }
+    });
 
     function handleInputStart(e) {
         if(gameState !== 'playing' && gameState !== 'phase2_playing') return;
@@ -1122,27 +990,15 @@
         setTimeout(() => { if(!input.isDown) joystickEl.style.display = 'none'; }, 150);
     }
 
-    canvas.addEventListener('mousedown', handleInputStart); 
-    canvas.addEventListener('mousemove', handleInputMove); 
-    window.addEventListener('mouseup', handleInputEnd);
-    canvas.addEventListener('touchstart', handleInputStart, {passive: false}); 
-    canvas.addEventListener('touchmove', handleInputMove, {passive: false}); 
-    window.addEventListener('touchend', handleInputEnd);
+    canvas.addEventListener('mousedown', handleInputStart); canvas.addEventListener('mousemove', handleInputMove); window.addEventListener('mouseup', handleInputEnd);
+    canvas.addEventListener('touchstart', handleInputStart, {passive: false}); canvas.addEventListener('touchmove', handleInputMove, {passive: false}); window.addEventListener('touchend', handleInputEnd);
 
     window.startGame = function() {
-        initAudioContext();
-        playSound('select');
+        playClickSound();
+        AudioEngine.playBGM();
         document.getElementById('startScreen').classList.remove('active');
         document.getElementById('hud').style.display = 'flex';
-        
-        // Show desktop hint if not on a primary mobile device
-        if (!('ontouchstart' in window)) {
-            document.getElementById('keyboardHint').style.display = 'block';
-        }
-
-        gameState = 'playing'; 
-        startTime = Date.now(); 
-        timerInterval = setInterval(updateTimer, 1000);
+        gameState = 'playing'; startTime = Date.now(); timerInterval = setInterval(updateTimer, 1000);
         
         for(let i = 0; i < 12; i++) {
             activeFollowers.push({ id: i, transformed: false });
@@ -1158,7 +1014,7 @@
     }
 
     function triggerQuestion(index) {
-        playSound('select');
+        AudioEngine.playTone(440, 'sine', 0.15, 0.1);
         gameState = 'question'; input.isDown = false; joystickEl.style.display = 'none';
         currentDinoIndex = index; const dino = dinos[index];
         
@@ -1180,7 +1036,7 @@
         dino.question.options.forEach((opt, i) => {
             const btn = document.createElement('button');
             btn.className = 'btn btn-outline'; btn.innerText = opt;
-            btn.onclick = () => checkAnswer(i);
+            btn.onclick = () => { playClickSound(); checkAnswer(i); };
             optsDiv.appendChild(btn);
         });
         
@@ -1188,14 +1044,14 @@
     }
 
     function createCelebrationParticles(x, y) {
-        const emojis = currentPhase === 1 ? ['💖', '✨', '🍀'] : ['💫', '✨', '⭐'];
-        const count = 18; 
+        const emojis = currentPhase === 1 ? ['💖', '✨', '🍀', '🌸'] : ['💖', '✨', '⭐', '🌌', '💫'];
+        const count = 22; 
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 4 + 2; 
+            const speed = Math.random() * 4.5 + 2; 
             particleSystems.push({
                 x: x, y: y,
-                vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1, 
+                vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1.2, 
                 emoji: emojis[Math.floor(Math.random() * emojis.length)],
                 life: 1.0, size: Math.random() * 10 + 16, decay: Math.random() * 0.015 + 0.01 
             });
@@ -1210,7 +1066,7 @@
         const optsDiv = document.getElementById('qOptions');
         
         if(selectedIndex === dino.question.ans) {
-            playSound('correct');
+            AudioEngine.playSuccess();
             document.getElementById('questionScreen').classList.remove('active');
             dino.state = 'caught';
             
@@ -1243,12 +1099,11 @@
                 }
             }
         } else {
-            // Error shake feedback
-            playSound('wrong');
+            AudioEngine.playError();
             optsDiv.style.display = 'none';
             qTitle.innerText = "答錯了！"; qTitle.style.color = "var(--error-red)";
             qSub.innerText = "WARNING"; qSub.style.color = "var(--error-red)";
-            document.getElementById('qText').innerText = "空間氣息受到了驚嚇，神秘生物重新移動了位置！ 💨";
+            document.getElementById('qText').innerText = "植物氣息受到了驚嚇，恐龍重新隱藏位置了 💨";
             modalBox.classList.add('error-shake');
             
             visualEffects.push({ x: dino.x, y: dino.y, emoji: '💨', life: 1.0 });
@@ -1260,45 +1115,43 @@
                 document.getElementById('questionScreen').classList.remove('active');
                 setTimeout(() => {
                     modalBox.classList.remove('error-shake');
-                    qTitle.innerText = "發現野生恐龍"; qTitle.style.color = currentPhase === 1 ? "var(--egarden-green-dark)" : "#8EBCF3";
-                    qSub.innerText = currentPhase === 1 ? "BOTANICAL QUIZ" : "MIRROR MEMBER UNLOCK";
-                    qSub.style.color = currentPhase === 1 ? "var(--egarden-green-light)" : "#5D8CC6";
+                    qTitle.innerText = "發現野生恐龍"; qTitle.style.color = currentPhase === 2 ? "#8EBCF3" : "var(--egarden-green-dark)";
+                    qSub.innerText = "BOTANICAL QUIZ"; qSub.style.color = currentPhase === 2 ? "#6C9BD2" : "var(--egarden-green-light)";
                     optsDiv.style.display = 'flex';
                 }, 300);
                 gameState = (currentPhase === 1) ? 'playing' : 'phase2_playing';
-            }, 1400);
+            }, 1200);
         }
     }
 
     function triggerCampHint() {
-        playSound('victory');
+        AudioEngine.playTone(880, 'triangle', 0.3, 0.15);
         gameState = 'camp_hint'; input.isDown = false; joystickEl.style.display = 'none';
         document.getElementById('campHintScreen').classList.add('active');
     }
 
     window.closeCampHint = function() {
-        playSound('select');
+        playClickSound();
         document.getElementById('campHintScreen').classList.remove('active'); 
         gameState = 'playing';
         const scoreDisp = document.getElementById('scoreDisplay');
-        scoreDisp.innerText = `🧭 引導隊伍大本營`; scoreDisp.classList.add('highlight');
+        scoreDisp.innerText = `🧭 引導 12 隻至大本營`; scoreDisp.classList.add('highlight');
     }
 
     function triggerPhase2Start() {
-        playSound('shift');
+        AudioEngine.playPhaseShift();
         gameState = 'phase2_start'; input.isDown = false; joystickEl.style.display = 'none';
         document.getElementById('phase2StartScreen').classList.add('active');
     }
 
     window.startPhase2 = function() {
-        playSound('shift');
+        playClickSound();
         document.getElementById('phase2StartScreen').classList.remove('active');
         currentPhase = 2; gameState = 'phase2_playing';
         
         document.body.classList.add('starry-mode');
         drawSpaceBackground();
         
-        // Populate cosmic background stellar particles
         starryParticles.length = 0;
         for (let i = 0; i < 110; i++) {
             starryParticles.push({
@@ -1306,7 +1159,7 @@
                 y: Math.random() * WORLD_SIZE,
                 radius: Math.random() * 1.8 + 0.4,
                 alpha: Math.random(),
-                speed: 0.008 + Math.random() * 0.018
+                speed: 0.008 + Math.random() * 0.02
             });
         }
         
@@ -1340,23 +1193,22 @@
     }
 
     function triggerPhase2EndHint() {
-        playSound('victory');
+        AudioEngine.playTone(987.77, 'triangle', 0.35, 0.15);
         gameState = 'phase2_end_hint'; input.isDown = false; joystickEl.style.display = 'none';
         document.getElementById('phase2EndHintScreen').classList.add('active');
     }
 
     window.closePhase2EndHint = function() {
-        playSound('select');
+        playClickSound();
         document.getElementById('phase2EndHintScreen').classList.remove('active');
         gameState = 'phase2_playing';
         const scoreDisp = document.getElementById('scoreDisplay');
-        scoreDisp.innerText = `🧭 帶領全體回營 ⛺`; scoreDisp.classList.add('highlight');
+        scoreDisp.innerText = `🧭 帶領成員隊伍回營 ⛺`; scoreDisp.classList.add('highlight');
     }
 
     function endGame() {
-        playSound('victory');
+        AudioEngine.playWinFanfare();
         gameState = 'end'; clearInterval(timerInterval); joystickEl.style.display = 'none';
-        document.getElementById('keyboardHint').style.display = 'none';
         const m = String(Math.floor(timeElapsed / 60)).padStart(2, '0'), s = String(timeElapsed % 60).padStart(2, '0');
         document.getElementById('finalTime').innerText = `${m}:${s}`;
         document.getElementById('hud').style.display = 'none';
@@ -1368,36 +1220,34 @@
     function update() {
         if(gameState !== 'playing' && gameState !== 'phase2_playing') return;
 
-        let isMoved = false;
-        let dx = 0;
-        let dy = 0;
+        let moveX = 0, moveY = 0;
 
-        // Collect Keyboard input
-        if (keysPressed['w'] || keysPressed['arrowup']) dy -= player.speed;
-        if (keysPressed['s'] || keysPressed['arrowdown']) dy += player.speed;
-        if (keysPressed['a'] || keysPressed['arrowleft']) dx -= player.speed;
-        if (keysPressed['d'] || keysPressed['arrowright']) dx += player.speed;
+        // 鍵盤輸入向量計算
+        if (keysPressed.ArrowUp || keysPressed.w) moveY -= 1;
+        if (keysPressed.ArrowDown || keysPressed.s) moveY += 1;
+        if (keysPressed.ArrowLeft || keysPressed.a) moveX -= 1;
+        if (keysPressed.ArrowRight || keysPressed.d) moveX += 1;
 
-        // Joystick inputs take precedence if active
-        if(input.isDown && (input.vectorX !== 0 || input.vectorY !== 0)) {
-            dx = input.vectorX * player.speed;
-            dy = input.vectorY * player.speed;
+        if (moveX !== 0 && moveY !== 0) {
+            const length = Math.hypot(moveX, moveY);
+            moveX /= length; moveY /= length;
         }
 
-        if (dx !== 0 || dy !== 0) {
-            // Apply diagonal velocity normalized scaling
-            if (dx !== 0 && dy !== 0) {
-                const diagScale = 0.7071;
-                dx *= diagScale;
-                dy *= diagScale;
-            }
+        // 優先讀取觸控搖桿
+        if (input.isDown && (input.vectorX !== 0 || input.vectorY !== 0)) {
+            moveX = input.vectorX;
+            moveY = input.vectorY;
+        }
 
+        let isMoved = false;
+        if (moveX !== 0 || moveY !== 0) {
+            const dx = moveX * player.speed, dy = moveY * player.speed;
             let nextX = Math.max(40, Math.min(WORLD_SIZE - 40, player.x + dx));
             let nextY = Math.max(40, Math.min(WORLD_SIZE - 40, player.y + dy));
             
             trees.forEach(tree => {
                 const dist = Math.hypot(nextX - tree.x, nextY - tree.y);
-                const currentTreeRadius = currentPhase === 2 ? tree.radius * 0.45 : tree.radius;
+                const currentTreeRadius = currentPhase === 2 ? tree.radius * 0.5 : tree.radius;
                 const minDist = player.radius + currentTreeRadius;
                 if (dist < minDist) {
                     const angle = Math.atan2(nextY - tree.y, nextX - tree.x);
@@ -1406,11 +1256,7 @@
                 }
             });
 
-            if (player.x !== nextX || player.y !== nextY) { 
-                player.x = nextX; 
-                player.y = nextY; 
-                isMoved = true; 
-            }
+            if (player.x !== nextX || player.y !== nextY) { player.x = nextX; player.y = nextY; isMoved = true; }
         }
 
         if (isMoved) {
@@ -1418,26 +1264,23 @@
             if(player.history.length > 200) player.history.pop();
         }
 
-        // Camera easing
-        camera.x += (player.x - camera.x) * 0.08; 
-        camera.y += (player.y - camera.y) * 0.08;
+        camera.x += (player.x - camera.x) * 0.1; camera.y += (player.y - camera.y) * 0.1;
 
-        // Range checking interaction triggers
         if (currentPhase === 1) {
             if(player.caughtDinos < 12) {
                 dinos.forEach((dino, index) => {
-                    if(dino.state === 'hidden' && Math.hypot(player.x - dino.x, player.y - dino.y) < 55) triggerQuestion(index);
+                    if(dino.state === 'hidden' && Math.hypot(player.x - dino.x, player.y - dino.y) < 50) triggerQuestion(index);
                 });
             } else {
-                if(Math.hypot(player.x - camp.x, player.y - camp.y) < 65) triggerPhase2Start();
+                if(Math.hypot(player.x - camp.x, player.y - camp.y) < 60) triggerPhase2Start();
             }
         } else {
             if(player.transformedMembers < 12) {
                 dinos.forEach((dino, index) => {
-                    if(dino.state === 'hidden' && Math.hypot(player.x - dino.x, player.y - dino.y) < 55) triggerQuestion(index);
+                    if(dino.state === 'hidden' && Math.hypot(player.x - dino.x, player.y - dino.y) < 50) triggerQuestion(index);
                 });
             } else {
-                if(Math.hypot(player.x - camp.x, player.y - camp.y) < 65) endGame();
+                if(Math.hypot(player.x - camp.x, player.y - camp.y) < 60) endGame();
             }
         }
         
@@ -1445,43 +1288,34 @@
         visualEffects = visualEffects.filter(eff => eff.life > 0);
 
         particleSystems.forEach(p => {
-            p.x += p.vx; p.y += p.vy; p.vy += 0.03; p.life -= p.decay;
+            p.x += p.vx; p.y += p.vy; p.vy += 0.02; p.life -= p.decay;
         });
         particleSystems = particleSystems.filter(p => p.life > 0);
 
-        // Update starry visuals if in starry phase
+        // 星海閃爍與流星生成
         if (currentPhase === 2) {
             starryParticles.forEach(star => {
                 star.alpha += star.speed;
-                if (star.alpha > 1 || star.alpha < 0.1) {
-                    star.speed = -star.speed;
-                }
+                if (star.alpha > 1 || star.alpha < 0.1) star.speed = -star.speed;
             });
 
-            // Random Shooting star triggers
-            if (Math.random() < 0.008 && shootingStars.length < 3) {
+            if (Math.random() < 0.03 && shootingStars.length < 3) {
                 shootingStars.push({
                     x: Math.random() * WORLD_SIZE,
                     y: Math.random() * (WORLD_SIZE / 2),
-                    dx: (Math.random() * 4 + 6),
-                    dy: (Math.random() * 2 + 3),
-                    length: Math.random() * 60 + 40,
-                    alpha: 1,
-                    life: 1.0
+                    length: Math.random() * 80 + 40,
+                    speed: Math.random() * 8 + 6,
+                    alpha: 1.0
                 });
             }
 
-            shootingStars.forEach(star => {
-                star.x += star.dx;
-                star.y += star.dy;
-                star.alpha -= 0.02;
+            shootingStars.forEach(s => {
+                s.x += s.speed;
+                s.y += s.speed * 0.6;
+                s.alpha -= 0.02;
             });
-
-            // Filtering ended shooting stars
             for (let i = shootingStars.length - 1; i >= 0; i--) {
-                if (shootingStars[i].alpha <= 0) {
-                    shootingStars.splice(i, 1);
-                }
+                if (shootingStars[i].alpha <= 0) shootingStars.splice(i, 1);
             }
         }
     }
@@ -1492,11 +1326,10 @@
     }
 
     function draw() {
-        // Clearing frames and establishing backdrop textures
         if (currentPhase === 2) {
-            ctx.fillStyle = '#060a13';
+            ctx.fillStyle = '#09101F';
         } else {
-            ctx.fillStyle = '#112213';
+            ctx.fillStyle = '#EAF2F8';
         }
         ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
@@ -1505,7 +1338,7 @@
 
         ctx.drawImage(bgCanvas, 0, 0);
 
-        // Draw twinkling stars and moving shooting stars in Phase 2
+        // 渲染星海粒子與流星
         if (currentPhase === 2) {
             starryParticles.forEach(star => {
                 ctx.save();
@@ -1517,123 +1350,116 @@
                 ctx.restore();
             });
 
-            shootingStars.forEach(star => {
+            shootingStars.forEach(s => {
                 ctx.save();
-                ctx.globalAlpha = star.alpha;
-                
-                // Draw falling glow tail line
-                const grad = ctx.createLinearGradient(star.x, star.y, star.x - star.dx, star.y - star.dy);
-                grad.addColorStop(0, '#FFFFFF');
-                grad.addColorStop(0.3, 'rgba(0, 240, 255, 0.8)');
-                grad.addColorStop(1, 'rgba(93, 156, 236, 0)');
-                
+                ctx.globalAlpha = s.alpha;
+                const grad = ctx.createLinearGradient(s.x, s.y, s.x - s.length, s.y - s.length * 0.6);
+                grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                grad.addColorStop(1, 'rgba(142, 188, 243, 0)');
                 ctx.strokeStyle = grad;
-                ctx.lineWidth = 2.5;
+                ctx.lineWidth = 1.8;
                 ctx.beginPath();
-                ctx.moveTo(star.x, star.y);
-                ctx.lineTo(star.x - star.dx * 6, star.y - star.dy * 6);
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(s.x - s.length, s.y - s.length * 0.6);
                 ctx.stroke();
                 ctx.restore();
             });
         }
 
-        // Draw camp visual center
+        // 渲染大本營
         ctx.save();
         if (currentPhase === 2) {
-            ctx.shadowColor = 'rgba(0, 240, 255, 0.7)'; ctx.shadowBlur = 24;
+            ctx.shadowColor = 'rgba(142, 188, 243, 0.85)'; ctx.shadowBlur = 22;
         } else {
-            ctx.shadowColor = 'rgba(19, 46, 27, 0.4)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 6;
+            ctx.shadowColor = 'rgba(26, 47, 22, 0.4)'; ctx.shadowBlur = 15; ctx.shadowOffsetY = 8;
         }
         const activeCampImg = (currentPhase === 1) ? images.camp : images.camp_p2;
         drawImageCentered(ctx, activeCampImg, camp.x, camp.y, camp.size, camp.size);
         ctx.restore();
 
-        // Draw border markers
+        // 渲染邊界
         borders.forEach(b => {
             const activeRockImg = (currentPhase === 1) ? images.rock : images.rock_p2;
-            drawImageCentered(ctx, activeRockImg, b.x, b.y, 44, 44);
+            drawImageCentered(ctx, activeRockImg, b.x, b.y, 42, 42);
         });
 
-        // Draw foliage barriers
+        // 渲染森林樹木
         trees.forEach(tree => {
             ctx.save();
             if (currentPhase === 2) {
-                ctx.shadowColor = 'rgba(93, 156, 236, 0.65)'; 
-                ctx.shadowBlur = 16;
+                ctx.shadowColor = 'rgba(142, 188, 243, 0.7)'; 
+                ctx.shadowBlur = 15;
                 const spaceTreeImgKey = tree.imgKey + '_p2';
-                // Scaled down to match 45% radius for celestial density styling
-                const reducedSize = tree.size * 0.48;
+                const reducedSize = tree.size * 0.5;
                 ctx.translate(tree.x, tree.y);
                 ctx.rotate(tree.angle);
                 drawImageCentered(ctx, images[spaceTreeImgKey], 0, 0, reducedSize, reducedSize);
             } else {
-                ctx.shadowColor = 'rgba(11, 23, 13, 0.45)'; 
-                ctx.shadowBlur = 14; 
-                ctx.shadowOffsetY = 7;
+                ctx.shadowColor = 'rgba(10, 20, 8, 0.4)'; 
+                ctx.shadowBlur = 12; 
+                ctx.shadowOffsetY = 8;
                 drawImageCentered(ctx, images[tree.imgKey], tree.x, tree.y, tree.size, tree.size);
             }
             ctx.restore();
         });
 
+        // 繪製草叢
         dinos.forEach((dino, index) => {
             if(dino.state === 'hidden') {
                 ctx.save();
-                const timeFactor = Date.now() * 0.0022 + index; 
+                const timeFactor = Date.now() * 0.0025 + index; 
                 const scaleEffect = 1 + Math.sin(timeFactor) * 0.06; 
-                const swayAngle = Math.sin(timeFactor * 1.1) * 0.08; 
+                const swayAngle = Math.sin(timeFactor * 1.2) * 0.08; 
                 
                 if (currentPhase === 2) {
-                    ctx.shadowColor = 'rgba(0, 240, 255, 0.6)';
+                    ctx.shadowColor = 'rgba(142, 188, 243, 0.7)';
                     ctx.shadowBlur = 12 + Math.sin(timeFactor) * 6;
                 } else {
-                    ctx.shadowColor = 'rgba(19, 46, 27, 0.4)';
-                    ctx.shadowBlur = 9 + Math.sin(timeFactor) * 5;
+                    ctx.shadowColor = 'rgba(26, 47, 22, 0.35)';
+                    ctx.shadowBlur = 8 + Math.sin(timeFactor) * 4;
                     ctx.shadowOffsetY = 4;
                 }
                 
-                ctx.translate(dino.x, dino.y); 
-                ctx.rotate(swayAngle);
+                ctx.translate(dino.x, dino.y); ctx.rotate(swayAngle);
                 
-                const bushSize = 48 * scaleEffect;
+                const bushSize = 50 * scaleEffect;
                 drawImageCentered(ctx, images[dino.bushKey], 0, 0, bushSize, bushSize);
                 
                 ctx.restore();
             }
         });
 
-        // Emitting interactive feedback indicators
+        // 特效與粒子
         visualEffects.forEach(eff => {
             ctx.save(); ctx.globalAlpha = eff.life; ctx.font = '45px Arial';
             ctx.fillText(eff.emoji, eff.x, eff.y - (1 - eff.life) * 60); ctx.restore();
         });
 
-        // Drawing custom celebratory particles
         particleSystems.forEach(p => {
             ctx.save(); ctx.globalAlpha = p.life; ctx.font = `${p.size}px Arial`;
             ctx.fillText(p.emoji, p.x, p.y); ctx.restore();
         });
 
-        // Draw follow-along parade alignments behind player
+        // 繪製隊伍成員
         let visibleFollowerCount = 0;
         activeFollowers.forEach((follower, index) => {
             const isVisible = (currentPhase === 1 && index < player.caughtDinos) || (currentPhase === 2);
             
             if(isVisible) {
                 visibleFollowerCount++;
-                const delayDistance = 9; // trail delay step count
-                const pos = player.history[visibleFollowerCount * delayDistance] || player.history[player.history.length-1];
+                const pos = player.history[visibleFollowerCount * 8] || player.history[player.history.length-1];
                 if(pos) {
                     ctx.save();
-                    const bounceOffset = Math.abs(Math.sin(Date.now() * 0.0055 + visibleFollowerCount)) * -6; 
+                    const bounceOffset = Math.abs(Math.sin(Date.now() * 0.005 + visibleFollowerCount)) * -6; 
                     
                     if (currentPhase === 2) {
-                        ctx.shadowColor = 'rgba(0, 240, 255, 0.6)'; ctx.shadowBlur = 14;
+                        ctx.shadowColor = 'rgba(142, 188, 243, 0.7)'; ctx.shadowBlur = 12;
                     } else {
-                        ctx.shadowColor = 'rgba(19, 46, 27, 0.3)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 5 - bounceOffset; 
+                        ctx.shadowColor = 'rgba(26, 47, 22, 0.28)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 5 - bounceOffset; 
                     }
                     
                     const imgToDraw = follower.transformed ? images[`member_${follower.id}`] : images.dino;
-                    const fSize = 55; 
+                    const fSize = 60; 
                     drawImageCentered(ctx, imgToDraw, pos.x, pos.y + bounceOffset, fSize, fSize);
                     
                     ctx.restore();
@@ -1641,12 +1467,12 @@
             }
         });
 
-        // Rendering main character
+        // 繪製玩家主角
         ctx.save();
         if (currentPhase === 2) {
-            ctx.shadowColor = 'rgba(0, 240, 255, 0.85)'; ctx.shadowBlur = 18;
+            ctx.shadowColor = 'rgba(142, 188, 243, 0.85)'; ctx.shadowBlur = 16;
         } else {
-            ctx.shadowColor = 'rgba(19, 46, 27, 0.45)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 6;
+            ctx.shadowColor = 'rgba(26, 47, 22, 0.4)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 6;
         }
         drawImageCentered(ctx, images.player, player.x, player.y, player.size, player.size);
         ctx.restore();
