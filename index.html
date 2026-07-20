@@ -590,6 +590,8 @@
         tree3_p2: 'assets/tree3_p2.png',
         rock: 'assets/rock.png',
         rock_p2: 'assets/rock_p2.png',
+        advance: 'assets/advance.png',
+        youtube: 'assets/youtube.png',
         member_0: 'assets/member_0.png',
         member_1: 'assets/member_1.png',
         member_2: 'assets/member_2.png',
@@ -632,6 +634,8 @@
             else if(key.startsWith('bush')) cctx.fillText('🌿', 32, 32);
             else if(key.startsWith('tree')) cctx.fillText('🌲', 32, 32);
             else if(key.startsWith('rock')) cctx.fillText('🪨', 32, 32);
+            else if(key === 'advance') cctx.fillText('🪐', 32, 32);
+            else if(key === 'youtube') cctx.fillText('▶️', 32, 32);
             else {
                 const emojis = ['👶🏼','🕺','🐨','🦄','🐲','🐤','🦊','🦍','🍅','🍬','🐠','🐯'];
                 const idx = parseInt(key.split('_')[1]) || 0;
@@ -652,6 +656,10 @@
     const CAMP_CENTER_X = WORLD_SIZE / 2;
     const CAMP_CENTER_Y = WORLD_SIZE / 2;
     let camera = { x: CAMP_CENTER_X, y: CAMP_CENTER_Y };
+
+    // 階段二新增特殊物件 (advance.png, youtube.png)
+    let advancePlanet = { x: 0, y: 0, size: 60, rotation: 0, active: false };
+    let youtubeNode = { x: 0, y: 0, size: 55, active: false };
 
     // 輸入控制（觸控搖桿 & 鍵盤）
     let input = { isDown: false, startX: 0, startY: 0, curX: 0, curY: 0, vectorX: 0, vectorY: 0 };
@@ -1045,7 +1053,7 @@
 
     function createCelebrationParticles(x, y) {
         const emojis = currentPhase === 1 ? ['💖', '✨', '🍀', '🌸'] : ['💖', '✨', '⭐', '🌌', '💫'];
-        const count = 22; 
+        const count = 8; 
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 4.5 + 2; 
@@ -1053,7 +1061,7 @@
                 x: x, y: y,
                 vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1.2, 
                 emoji: emojis[Math.floor(Math.random() * emojis.length)],
-                life: 1.0, size: Math.random() * 10 + 16, decay: Math.random() * 0.015 + 0.01 
+                life: 0.5, size: Math.random() * 5 + 16, decay: Math.random() * 0.015 + 0.01 
             });
         }
     }
@@ -1151,6 +1159,17 @@
         
         document.body.classList.add('starry-mode');
         drawSpaceBackground();
+
+        // 階段二隨機生成 advance.png 和 youtube.png 的位置
+        const posAdv = getRandomDispersedPosition();
+        advancePlanet.x = posAdv.x;
+        advancePlanet.y = posAdv.y;
+        advancePlanet.active = true;
+
+        const posYtb = getRandomDispersedPosition();
+        youtubeNode.x = posYtb.x;
+        youtubeNode.y = posYtb.y;
+        youtubeNode.active = true;
         
         starryParticles.length = 0;
         for (let i = 0; i < 110; i++) {
@@ -1239,9 +1258,40 @@
             moveY = input.vectorY;
         }
 
+        let effectiveSpeed = player.speed;
+
+        // 階段二特殊邏輯：自轉星球 (advance.png) 吸引力與減速
+        if (currentPhase === 2 && advancePlanet.active) {
+            advancePlanet.rotation += 0.02; // 星球持續自轉
+            const distAdv = Math.hypot(advancePlanet.x - player.x, advancePlanet.y - player.y);
+            const gravityRadius = 220; // 影響力的物理作用範圍
+
+            if (distAdv < gravityRadius) {
+                // 進入範圍內獲得吸引力 pull
+                const pullStrength = (1 - distAdv / gravityRadius) * 2.2;
+                const angleToPlanet = Math.atan2(advancePlanet.y - player.y, advancePlanet.x - player.x);
+                player.x += Math.cos(angleToPlanet) * pullStrength;
+                player.y += Math.sin(angleToPlanet) * pullStrength;
+
+                // 經過/靠近時速度變慢，保持距離可慢慢離開
+                effectiveSpeed = player.speed * (0.35 + (distAdv / gravityRadius) * 0.65);
+            }
+        }
+
+        // 階段二特殊邏輯：YouTube (youtube.png) 觸碰跳轉
+        if (currentPhase === 2 && youtubeNode.active) {
+            const distYtb = Math.hypot(youtubeNode.x - player.x, youtubeNode.y - player.y);
+            if (distYtb < 40) {
+                window.open('https://youtu.be/fcf3RsDaqes?si=fLoUI1gSAqDBpFgy', '_blank');
+                // 將玩家推開避免重複觸發
+                player.x += (player.x - youtubeNode.x > 0 ? 50 : -50);
+                player.y += (player.y - youtubeNode.y > 0 ? 50 : -50);
+            }
+        }
+
         let isMoved = false;
         if (moveX !== 0 || moveY !== 0) {
-            const dx = moveX * player.speed, dy = moveY * player.speed;
+            const dx = moveX * effectiveSpeed, dy = moveY * effectiveSpeed;
             let nextX = Math.max(40, Math.min(WORLD_SIZE - 40, player.x + dx));
             let nextY = Math.max(40, Math.min(WORLD_SIZE - 40, player.y + dy));
             
@@ -1376,6 +1426,26 @@
         const activeCampImg = (currentPhase === 1) ? images.camp : images.camp_p2;
         drawImageCentered(ctx, activeCampImg, camp.x, camp.y, camp.size, camp.size);
         ctx.restore();
+
+        // 階段二渲染自轉星球 (advance.png)
+        if (currentPhase === 2 && advancePlanet.active) {
+            ctx.save();
+            ctx.translate(advancePlanet.x, advancePlanet.y);
+            ctx.rotate(advancePlanet.rotation);
+            ctx.shadowColor = 'rgba(142, 188, 243, 0.8)';
+            ctx.shadowBlur = 20;
+            drawImageCentered(ctx, images.advance, 0, 0, advancePlanet.size, advancePlanet.size);
+            ctx.restore();
+        }
+
+        // 階段二渲染 YouTube 節點 (youtube.png)
+        if (currentPhase === 2 && youtubeNode.active) {
+            ctx.save();
+            ctx.shadowColor = 'rgba(255, 50, 50, 0.8)';
+            ctx.shadowBlur = 18;
+            drawImageCentered(ctx, images.youtube, youtubeNode.x, youtubeNode.y, youtubeNode.size, youtubeNode.size);
+            ctx.restore();
+        }
 
         // 渲染邊界
         borders.forEach(b => {
