@@ -689,7 +689,7 @@
     let camera = { x: CAMP_CENTER_X, y: CAMP_CENTER_Y };
 
     // 階段二新增特殊物件 (advance.png, youtube.png)
-    let advancePlanet = { x: 0, y: 0, size: 60, rotation: 0, active: false };
+    let advancePlanet = { x: 0, y: 0, size: 250, rotation: 0, active: false };
     let youtubeNode = { x: 0, y: 0, size: 55, active: false };
 
     // 輸入控制（觸控搖桿 & 鍵盤）
@@ -1570,7 +1570,7 @@
             ctx.save();
             ctx.translate(advancePlanet.x, advancePlanet.y);
             ctx.rotate(advancePlanet.rotation);
-            ctx.shadowColor = 'rgba(142, 188, 243, 0.8)';
+            ctx.shadowColor = 'rgba(87, 48, 115, 0.8)';
             ctx.shadowBlur = 20;
             drawImageCentered(ctx, images.advance, 0, 0, advancePlanet.size, advancePlanet.size);
             ctx.restore();
