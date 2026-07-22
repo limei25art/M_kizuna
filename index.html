@@ -24,7 +24,7 @@
         body { 
             margin: 0; padding: 0; 
             font-family: "Playfair Display", "PingFang HK", -apple-system, BlinkMacSystemFont, serif;
-            background-color: #1A2F16; 
+            background-color: rgba(16, 41, 11, 1); 
             overflow: hidden; 
             touch-action: none;
             width: 100vw;
@@ -137,6 +137,16 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
             transition: all 0.4s ease;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .controls-hint img {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+            vertical-align: middle;
         }
 
         body.starry-mode .controls-hint {
@@ -408,7 +418,9 @@
                 </div>
             </div>
         </div>
-        <div class="controls-hint" id="controlsHint">鍵盤方向鍵 或 觸控搖桿皆可移動<br>尋找🍀/✨</br>
+        <div class="controls-hint" id="controlsHint">
+            <span>鍵盤方向鍵 或 觸控搖桿皆可移動，尋找</span>
+            <img src="assets/bush1.png" alt="bush1">
         </div>
     </div>
 
@@ -436,7 +448,7 @@
             <div class="emoji-art">⛺✨🍀</div>
             <h2>KIZUNA 羈絆已建立</h2>
             <span class="subtitle">MISSION 1 COMPLETED</span>
-            <p>做得很好，12 隻 MIRROR 恐龍已被成功收服。<br>現在，請伴隨隊伍回到地圖正中央的 <strong>大本營</strong> 集合，開啟下一階段的新任務！</p>
+            <p>做得獨太好，12 隻 MIRROR 恐龍已被成功收服。<br>現在，請伴隨隊伍回到地圖正中央的 <strong>大本營</strong> 集合，開啟下一階段的覺醒任務！</p>
             <button class="btn" style="background: linear-gradient(135deg, var(--egarden-green-leaf), #556B2F);" onclick="closeCampHint()">回歸大本營</button>
         </div>
     </div>
@@ -444,9 +456,9 @@
     <div class="modal-container center-text-modal" id="phase2StartScreen">
         <div class="modal">
             <div class="emoji-art">🌌✨💫</div>
-            <h2>觸發新任務！</h2>
+            <h2>覺醒任務！</h2>
             <span class="subtitle">PHASE 2: MEMORIES SHATTERED</span>
-            <p>境遷時移！恐龍們受到星辰魔法召喚，重新隱藏於星空！<br><br>請再次踏入星空尋找隱秘的<strong>✨</strong>。這一次，整片原野將幻化為<strong>神祕星海</strong>！你需要回答12 位成員個人專屬問題，讓身邊跟隨的恐龍覺醒為成員！<br>全部變身成功後再帶領整隊人馬回大本營集合吧！</p>
+            <p>境遷時移！恐龍們受到星辰魔法召喚，重新隱藏於星空！<br><br>請再次踏入星空尋找隱秘的星辰 。在這<strong>神祕星海</strong>！你需要回答12位成員個人專屬問題，讓身邊跟隨的恐龍覺醒為成員！<br>全部變身成功後再帶領整隊回大本營集合吧！</p>
             <button class="btn" onclick="startPhase2()">接受新任務</button>
         </div>
     </div>
@@ -1002,7 +1014,13 @@
         bgCtx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
 
         bgCtx.fillStyle = 'rgba(253, 251, 247, 0.08)'; bgCtx.beginPath(); bgCtx.arc(camp.x, camp.y, 85, 0, Math.PI * 2); bgCtx.fill();
-        bgCtx.strokeStyle = 'rgba(142, 188, 243, 0.4)'; bgCtx.lineWidth = 2; bgCtx.setLineDash([6, 8]); bgCtx.stroke(); bgCtx.setLineDash([]);
+        
+        // --- 設定星海模式中央圓環邊界的虛線樣式 ---
+        bgCtx.strokeStyle = 'rgba(142, 188, 243, 1)'; 
+        bgCtx.lineWidth = 2; 
+        bgCtx.setLineDash([20, 8]); 
+        bgCtx.stroke(); 
+        bgCtx.setLineDash([]);
     }
 
     drawGrassBackground();
@@ -1209,6 +1227,12 @@
         document.getElementById('phase2StartScreen').classList.remove('active');
         currentPhase = 2; gameState = 'phase2_playing';
         
+        // 更新底部操控提示為階段二圖片 (bush2.png)
+        document.getElementById('controlsHint').innerHTML = `
+            <span>鍵盤方向鍵 或 觸控搖桿皆可移動，尋找</span>
+            <img src="assets/bush2.png" alt="bush2">
+        `;
+
         document.body.classList.add('starry-mode');
         drawSpaceBackground();
 
@@ -1510,7 +1534,7 @@
         if (currentPhase === 2) {
             ctx.fillStyle = '#09101F';
         } else {
-            ctx.fillStyle = '#EAF2F8';
+            ctx.fillStyle = 'rgba(16, 41, 11, 1)';
         }
         ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
@@ -1593,10 +1617,17 @@
             ctx.restore();
         }
 
-        // 渲染邊界
+        // 渲染邊界外框虛線與障礙物
+        ctx.save();
+        ctx.strokeStyle = currentPhase === 2 ? 'rgba(44, 60, 107, 1)' : 'rgba(1, 62, 33, 1)';
+        ctx.lineWidth = 5;
+        ctx.setLineDash([20, 8]);
+        ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+        ctx.restore();
+
         borders.forEach(b => {
             const activeRockImg = (currentPhase === 1) ? images.rock : images.rock_p2;
-            drawImageCentered(ctx, activeRockImg, b.x, b.y, 42, 42);
+            drawImageCentered(ctx, activeRockImg, b.x, b.y, 10, 10);
         });
 
         // 渲染森林樹木
