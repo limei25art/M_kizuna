@@ -484,7 +484,7 @@
             <div class="emoji-art">🌌✨💫</div>
             <h2>覺醒任務！</h2>
             <span class="subtitle">PHASE 2: MEMORIES SHATTERED</span>
-            <p>境遷時移！恐龍們受到星辰魔法召喚，重新隱藏於星空！<br><br>請再次踏入星空尋找隱秘的星辰 。在這<strong>神祕星海</strong>！你需要回答12位成員個人專屬問題，讓身邊跟隨的恐龍覺醒為成員！<br>全部變身成功後再帶領整隊回大本營集合吧！</p>
+            <p>恐龍們受到星辰魔法召喚，重新隱藏於星空！<br><br>請踏入星空尋找隱秘的星辰 。在這<strong>神祕星海</strong>！你需要回答12位成員個人專屬問題，讓身邊跟隨的恐龍覺醒為成員！<br>全部變身成功後再帶領整隊回大本營集合吧！</p>
             <button class="btn" onclick="startPhase2()">接受新任務</button>
         </div>
     </div>
@@ -516,10 +516,10 @@
             <div class="emoji-art">🏛️🏆⛺</div>
             <h2>沿途高低同往</h2>
             <span class="subtitle">MIRROR - KIZUNA</span>
-            <img src="assets/oooog.jpg" class="end-img-banner" alt="MIRROR KIZUNA End Banner">
+            <img id="endBannerImg" src="assets/oooog.jpg" class="end-img-banner" alt="MIRROR KIZUNA End Banner">
             <p>你已成功將所有 MIRROR 隊員帶回營地！<br>探索總時間：<strong id="finalTime">00:00</strong></p>
-            <button class="btn" onclick="playClickSound(); window.open('https://lnk.to/MirrorKIZUNA?utm_source=ig&utm_medium=social&utm_content=link_in_bio', '_blank')">🎵 聆聽 MIRROR - KIZUNA</button>
-            <button class="btn" style="background: rgba(58, 90, 64, 0.08); color: var(--egarden-green-dark); box-shadow: none;" onclick="playClickSound(); location.reload()">重新探索空間</button>
+            <button class="btn" onclick="playClickSound(); window.open('https://lnk.to/MirrorKIZUNA?utm_source=ig&utm_medium=social&utm_content=link_in_bio', '_blank')"> ♬ 聆聽 MIRROR - KIZUNA ♬</button>
+            <button class="btn" style="background: rgba(142, 188, 243, 0.12); color: #F0F4F8; border: 1px solid rgba(142, 188, 243, 0.3); box-shadow: none;" onclick="playClickSound(); location.reload()">重新探索</button>
         </div>
     </div>
 
@@ -601,17 +601,6 @@
             freqs.forEach((f, i) => {
                 setTimeout(() => this.playTone(f, 'sine', 0.3, 0.08), i * 90);
             });
-        },
-
-        playWinFanfare() {
-            if (this.muted) return;
-            const melody = [
-                {f: 523.25, d: 0.15}, {f: 659.25, d: 0.15}, {f: 783.99, d: 0.15}, 
-                {f: 1046.5, d: 0.4}
-            ];
-            melody.forEach((note, i) => {
-                setTimeout(() => this.playTone(note.f, 'triangle', note.d, 0.15), i * 140);
-            });
         }
     };
 
@@ -642,7 +631,7 @@
     }
     window.addEventListener('resize', resize); resize();
 
-    // 預載入圖片資產系統
+    // 預載入圖片資產系統（加入 oooog_KO.jpg 以確保通關圖片順暢加載）
     const assetsData = {
         player: 'assets/player.png',
         camp: 'assets/camp.png',
@@ -661,6 +650,8 @@
         rock_p2: 'assets/rock_p2.png',
         advance: 'assets/advance.png',
         youtube: 'assets/youtube.png',
+        end_banner_normal: 'assets/oooog.jpg',
+        end_banner_ko: 'assets/oooog_KO.jpg',
         member_0: 'assets/member_0.png',
         member_1: 'assets/member_1.png',
         member_2: 'assets/member_2.png',
@@ -706,6 +697,7 @@
             else if(key.startsWith('rock')) cctx.fillText('🪨', 32, 32);
             else if(key === 'advance') cctx.fillText('🪐', 32, 32);
             else if(key === 'youtube') cctx.fillText('▶️', 32, 32);
+            else if(key.startsWith('end_banner')) cctx.fillText('🖼️', 32, 32);
             else {
                 const emojis = ['🍅','🦍','🕺','🐲','🦊','🐠','🐨','👶','🦄','🐤','🍬','🐯'];
                 const idx = parseInt(key.split('_')[1]) || 0;
@@ -723,6 +715,9 @@
     let currentPhase = 1; 
     let startTime = 0, timerInterval = null, timeElapsed = 0;
     
+    // 記錄玩家是否有答錯過問題
+    let hasWrongAnswer = false;
+
     const CAMP_CENTER_X = WORLD_SIZE / 2;
     const CAMP_CENTER_Y = WORLD_SIZE / 2;
     let camera = { x: CAMP_CENTER_X, y: CAMP_CENTER_Y };
@@ -782,7 +777,7 @@
         { q: "哪一家經理人公司負責 MIRROR 的日常運作？", options: ["大國文化", "MakerVille", "ViuTV"], ans: 1 },
         { q: "MIRROR 於 20 年推出的洗腦動感團體舞曲是？", options: ["《IGNITED》", "《ASAP》", "《All In One》"], ans: 0 },
         { q: "MIRROR 的副隊長是誰？", options: ["江𤒹生", "陳卓賢", "邱士縉"], ans: 0 },
-        { q: "《全民造星》第一季時由哪位節目監製發掘提拔？", options: ["黃慧君 (花姐)", "魯庭暉", "林二汶"], ans: 0 },
+        { q: "《全民造星》第一季時由哪位節目監製發掘提拔？", options: ["黃慧君 (花姐)", "魯庭暉", "強尼"], ans: 0 },
         { q: "MIRROR 的首個專屬團體綜藝節目名稱是？", options: ["《MIRROR GO》", "《考有 Feel》", "《調教你 MIRROR》"], ans: 0 },
         { q: "MIRROR 於 21 年成軍三周年的派台單曲是？", options: ["《ALL IN ONE》", "《BOSS》", "《WARRIOR》"], ans: 0 },
         { q: "哪一首歌是 MIRROR 的首支英文單曲？", options: ["《Rumours》", "《Rocketstars》", "《Catch a Vibe》"], ans: 0 },
@@ -820,7 +815,7 @@
             pool: [
                 { q: "Lokman 擅長哪種舞種？", options: ["Ballet", "Locking", "Breakdance"], ans: 1 },
                 { q: "Lokman 在成名前曾主演過哪部關於跳舞的電影？", options: ["《狂舞派》", "《點五步》", "《逆流大叔》"], ans: 0 },
-                { q: "Lokman 的個人粉絲名稱為？", options: ["檸檬糖", "頭巾兵團", "文文"], ans: 1 },
+                { q: "Lokman 的個人粉絲名稱為？", options: ["檸檬糖", "頭巾兵團", "菲律賓老婆"], ans: 1 },
                 { q: "隊長 Lokman 的生日日期是哪一天？", options: ["9月26日", "10月9日", "11月20日"], ans: 0 }
             ]
         },
@@ -836,7 +831,7 @@
         {
             id: 8, name: "Jeremy (李駿傑)", emoji: "🦄",
             pool: [
-                { q: "Jeremy 的個人粉絲名稱為？", options: ["Unicorn", "獸獸", "駿友"], ans: 0 },
+                { q: "Jeremy 的個人粉絲名稱為？", options: ["Unicorn", "Nana", "米粉"], ans: 0 },
                 { q: "Jeremy 第一首推出的個人派台單曲是？", options: ["《半》", "《九》", "《阿波羅》"], ans: 0 },
                 { q: "Jeremy擅長 的演唱類型？", options: ["高音 / 情感", "Rap", "低音"], ans: 0 },
                 { q: "Jeremy 的生日日期是哪一天？", options: ["9月8日", "7月16日", "11月20日"], ans: 0 }
@@ -846,7 +841,7 @@
             id: 3, name: "Stanley (邱士縉)", emoji: "🐲",
             pool: [
                 { q: "Stanley 的個人粉絲名稱為？", options: ["TeamStanley", "波波", "Team波波"], ans: 0 },
-                { q: "Stanley 在《野人老師》中飾演什麼？", options: ["李白老師", "大表哥", "校長"], ans: 0 },
+                { q: "Stanley 在《野人老師》中飾演什麼？", options: ["李白老師", "黃亞樂", "方官"], ans: 0 },
                 { q: "Stanley 在團體中常被成員與大眾戲稱為什麼？", options: ["大表哥", "大表波", "大表"], ans: 0 },
                 { q: "Stanley 的生日日期是哪一天？", options: ["8月20日", "7月29日", "10月16日"], ans: 0 }
             ]
@@ -863,7 +858,7 @@
         {
             id: 4, name: "Anson Kong (江𤒹生)", emoji: "🦊",
             pool: [
-                { q: "AK 的姓名正寫是？", options: [ "江𤒹生", "汪𤒹生", "江畢生"], ans: 0 },
+                { q: "AK 的姓名正寫是？", options: [ "江𤒹生", "江熚生", "江畢生"], ans: 0 },
                 { q: "AK 的個人粉絲名稱為？", options: ["生粉", "米粉", "老闆"], ans: 0 },
                 { q: "AK 創立的潮流日系服裝品牌名稱是？", options: ["KYUBI", "DEZERT", "NADE"], ans: 0 },
                 { q: "AK 的生日日期是哪一天？", options: ["10月16日", "9月26日", "8月20日"], ans: 0 }
@@ -872,7 +867,7 @@
         {
             id: 1, name: "Alton (王智德)", emoji: "🦍",
             pool: [
-                { q: "Alton 的個人粉絲名稱為？", options: ["王勁", "蛋白粉", "力量粉"], ans: 1 },
+                { q: "Alton 的個人粉絲名稱為？", options: ["德仔", "蛋白粉", "力量粉"], ans: 1 },
                 { q: "Alton 在團體表演中主要負責的部分是？", options: ["高音主唱", "饒舌 (Rap) 與舞蹈", "和音主唱"], ans: 1 },
                 { q: "Alton 的勵志金句「尋求無悔真生活」出自哪裡？", options: ["《全民造星》第一季參賽感言", "他的個人Solo單曲", "他的綜藝直播"], ans: 0 },
                 { q: "Alton 的生日日期是哪一天？", options: ["9月21日", "5月26日", "7月3日"], ans: 0 }
@@ -882,7 +877,7 @@
             id: 0, name: "Frankie (陳瑞輝)", emoji: "🍅",
             pool: [
                 { q: "Frankie 的個人粉絲名稱為？", options: ["皮寶寶", "皮皮", "寶寶"], ans: 0 },
-                { q: "Frankie 在 MIRROR 中給人的印象是？", options: ["零死角美男子", "最活潑話癆", "冷酷硬漢"], ans: 0 },
+                { q: "Frankie 在 MIRROR 中給人的印象是？", options: ["零死角美男子", "最活潑成員", "冷酷硬漢"], ans: 0 },
                 { q: "Frankie 在 24 年底演出了哪部浪漫音樂喜劇？", options: ["《麻甩媽咪》", "《小男人周記》", "《IT狗2.0》"], ans: 1 },
                 { q: "Frankie 的生日日期是哪一天？", options: ["7月29日", "8月7日", "4月30日"], ans: 0 }
             ]
@@ -892,7 +887,7 @@
             pool: [
                 { q: "姜濤的個人粉絲名稱為？", options: ["姜糖", "糖", "糖水"], ans: 0 },
                 { q: "姜濤第一首推出的首發個人派台單曲是？", options: ["一號種籽", "蒙著嘴說愛你", "Dear My Friend"], ans: 0 },
-                { q: "姜濤在主演電影《阿媽有咗第二個》飾演的角色是？", options: ["方晴", "阿孝", "姜濤"], ans: 0 },
+                { q: "姜濤在主演電影《阿媽有咗第二個》飾演的角色是？", options: ["方晴", "阿孝", "萊叔"], ans: 0 },
                 { q: "姜濤的生日日期是哪一天？", options: ["4月30日", "6月9日", "7月3日"], ans: 0 }
             ]
         },
@@ -910,7 +905,7 @@
             pool: [
                 { q: "Tiger 是 MIRROR 裡面什麼排行擔當？", options: ["最年長成員", "最年輕成員", "副隊長"], ans: 1 },
                 { q: "Tiger 除了演戲跳舞，還具備哪項專業技能？", options: ["烹飪", "執導 MV/短片", "車手"], ans: 1 },
-                { q: "Tiger 的個人粉絲名稱為？", options: ["小虎隊", "老虎仔", "虎虎"], ans: 0 },
+                { q: "Tiger 的個人粉絲名稱為？", options: ["小虎隊", "老虎仔", "霹靂虎"], ans: 0 },
                 { q: "Tiger 的生日日期是哪一天？", options: ["7月3日", "7月29日", "9月21日"], ans: 0 }
             ]
         }
@@ -1105,6 +1100,8 @@
         document.getElementById('hud').style.display = 'flex';
         gameState = 'playing'; startTime = Date.now(); timerInterval = setInterval(updateTimer, 1000);
         
+        hasWrongAnswer = false; // 重設全對狀態紀錄
+
         for(let i = 0; i < 12; i++) {
             activeFollowers.push({ id: i, transformed: false });
         }
@@ -1132,7 +1129,7 @@
         const qSub = document.getElementById('qSub');
         if (currentPhase === 1) {
             qTitle.innerText = "發現野生恐龍 🦖";
-            qSub.innerText = "KIZUNA BOTANICAL QUIZ";
+            qSub.innerText = "KIZUNA QUIZ";
         } else {
             qTitle.innerText = `尋回 ${dino.question.name} 記憶 ✨`;
             qSub.innerText = "MIRROR MEMBER UNLOCK";
@@ -1208,11 +1205,13 @@
                 }
             }
         } else {
+            // 標記曾有答錯
+            hasWrongAnswer = true;
+
             AudioEngine.playError();
             optsDiv.style.display = 'none';
             qTitle.innerText = "答錯了！"; qTitle.style.color = "var(--error-red)";
             qSub.innerText = "WARNING"; qSub.style.color = "var(--error-red)";
-            document.getElementById('qText').innerText = "🍀受到了驚嚇，恐龍重新隱藏位置了 💨";
             modalBox.classList.add('error-shake');
             
             visualEffects.push({ x: dino.x, y: dino.y, emoji: '💨', life: 1.0 });
@@ -1243,8 +1242,9 @@
         playClickSound();
         document.getElementById('campHintScreen').classList.remove('active'); 
         gameState = 'playing';
-        const scoreDisp = document.getElementById('scoreDisplay');
-        document.getElementById('scoreText').innerText = `引導 12 隻至大本營`; scoreDisp.classList.add('highlight');
+        document.getElementById('controlsHint').innerHTML = `
+            <span>引導12隻至大本營地⛺</span>
+        `;
     }
 
     function triggerPhase2Start() {
@@ -1328,8 +1328,9 @@
         playClickSound();
         document.getElementById('phase2EndHintScreen').classList.remove('active');
         gameState = 'phase2_playing';
-        const scoreDisp = document.getElementById('scoreDisplay');
-        document.getElementById('scoreText').innerText = `帶領成員隊伍回營 ⛺`; scoreDisp.classList.add('highlight');
+        document.getElementById('controlsHint').innerHTML = `
+            <span>帶領成員隊伍回營 ⛺</span>
+        `;
     }
 
     // --- YouTube POPUP 控制邏輯 ---
@@ -1357,48 +1358,7 @@
         gameState = 'phase2_playing';
     }
 
-    // --- 慶祝歡呼 So Happy 效果與通關結束 ---
-    function triggerSoHappyCelebration() {
-        // 音效歡呼
-        AudioEngine.playWinFanfare();
-        
-        // 生成 So Happy 特效文字與歡慶粒子
-        const emojis = ['🎉', '✨', '🌟', '🎊', '🥳', '💖', '🍀', '⛺'];
-        for (let i = 0; i < 5; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 8 + 3;
-            particleSystems.push({
-                x: camp.x,
-                y: camp.y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed - 2,
-                emoji: emojis[Math.floor(Math.random() * emojis.length)],
-                life: 1.2,
-                size: Math.random() * 30 + 20,
-                decay: 0.015
-            });
-        }
-
-        // So Happy 飄浮大文字
-        for (let i = 0; i < 1; i++) {
-            particleSystems.push({
-                x: camp.x + (Math.random() - 0.5) * 100,
-                y: camp.y + (Math.random() - 0.5) * 50,
-                vx: (Math.random() - 0.5) * 2,
-                vy: -Math.random() * 3 - 2,
-                text: "SO HAPPY!! 🎉",
-                color: "#8EBCF3",
-                life: 1.5,
-                size: 32,
-                decay: 0.012
-            });
-        }
-    }
-
     function endGame() {
-        // 先觸發 So Happy 慶祝特效
-        triggerSoHappyCelebration();
-        
         gameState = 'end'; 
         clearInterval(timerInterval); 
         joystickEl.style.display = 'none';
@@ -1407,10 +1367,16 @@
         document.getElementById('finalTime').innerText = `${m}:${s}`;
         document.getElementById('hud').style.display = 'none';
         
-        // 先出 POPUP endScreen (帶著 assets/oooog.jpg 圖片)
-        setTimeout(() => { 
-            document.getElementById('endScreen').classList.add('active'); 
-        }, 300);
+        // 判斷是否全部答對：無答錯記錄時顯示 oooog_KO.jpg，否則顯示 oooog.jpg
+        const bannerImg = document.getElementById('endBannerImg');
+        if (!hasWrongAnswer) {
+            bannerImg.src = "assets/oooog_KO.jpg";
+        } else {
+            bannerImg.src = "assets/oooog.jpg";
+        }
+
+        // 顯示 POPUP endScreen
+        document.getElementById('endScreen').classList.add('active'); 
     }
 
     function gameLoop() { update(); draw(); if(gameState !== 'end') requestAnimationFrame(gameLoop); }
@@ -1729,28 +1695,54 @@
             ctx.restore();
         });
 
-        // 繪製草叢
+        // 繪製 Bush1 & Bush2 草叢（包含呼吸光暈與縮放）
         dinos.forEach((dino, index) => {
             if(dino.state === 'hidden') {
                 ctx.save();
-                const timeFactor = Date.now() * 0.0025 + index; 
-                const scaleEffect = 1 + Math.sin(timeFactor) * 0.06; 
-                const swayAngle = Math.sin(timeFactor * 1.2) * 0.08; 
+                const now = Date.now();
+                const timeFactor = now * 0.003 + index * 1.5; 
+                const pulse = Math.sin(timeFactor);
+                
+                // 動態呼吸尺寸與擺動角度
+                const scaleEffect = 1 + pulse * 0.12; 
+                const swayAngle = Math.sin(timeFactor * 1) * 0.1; 
+                
+                // 1. 繪製底部發光脈動背景 (Glow Aura)
+                const glowRadius = 10 * scaleEffect;
+                const radGrad = ctx.createRadialGradient(dino.x, dino.y, 5, dino.x, dino.y, glowRadius);
+                const glowAlpha = 0.1 + pulse * 0.1;
                 
                 if (currentPhase === 2) {
-                    ctx.shadowColor = 'rgba(142, 188, 243, 0.7)';
-                    ctx.shadowBlur = 12 + Math.sin(timeFactor) * 6;
+                    radGrad.addColorStop(0, `rgba(142, 188, 243, ${glowAlpha})`);
+                    radGrad.addColorStop(1, 'rgba(142, 188, 243, 0)');
                 } else {
-                    ctx.shadowColor = 'rgba(26, 47, 22, 0.35)';
-                    ctx.shadowBlur = 8 + Math.sin(timeFactor) * 4;
+                    radGrad.addColorStop(0, `rgba(163, 230, 53, ${glowAlpha})`);
+                    radGrad.addColorStop(1, 'rgba(163, 230, 53, 0)');
+                }
+                
+                ctx.fillStyle = radGrad;
+                ctx.beginPath();
+                ctx.arc(dino.x, dino.y, glowRadius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 2. 渲染草叢主體
+                ctx.save();
+                if (currentPhase === 2) {
+                    ctx.shadowColor = 'rgba(142, 188, 243, 0.9)';
+                    ctx.shadowBlur = 18 + pulse * 8;
+                } else {
+                    ctx.shadowColor = 'rgba(110, 231, 183, 0.8)';
+                    ctx.shadowBlur = 14 + pulse * 6;
                     ctx.shadowOffsetY = 4;
                 }
                 
-                ctx.translate(dino.x, dino.y); ctx.rotate(swayAngle);
+                ctx.translate(dino.x, dino.y); 
+                ctx.rotate(swayAngle);
                 
-                const bushSize = 50 * scaleEffect;
+                const bushSize = 58 * scaleEffect;
                 drawImageCentered(ctx, images[dino.bushKey], 0, 0, bushSize, bushSize);
-                
+                ctx.restore();
+
                 ctx.restore();
             }
         });
